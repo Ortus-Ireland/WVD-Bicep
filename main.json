@@ -1,0 +1,1855 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1.14562",
+      "templateHash": "14605828279094664295"
+    }
+  },
+  "parameters": {
+    "adminPassword": {
+      "type": "secureString",
+      "metadata": {
+        "description": "VM local Admin Password"
+      }
+    },
+    "WGadminPassword": {
+      "type": "secureString",
+      "metadata": {
+        "description": "Wireguard Admin Password"
+      }
+    },
+    "WireguardConfNum": {
+      "type": "string"
+    },
+    "WireguardStartingIP": {
+      "type": "string"
+    },
+    "DC1CustomRDPport": {
+      "type": "int",
+      "metadata": {
+        "description": "Custom Port for DC1 between 50000 and 63000"
+      }
+    },
+    "DC2CustomRDPport": {
+      "type": "int",
+      "metadata": {
+        "description": "Custom Port for DC2 between 50000 and 63000"
+      }
+    },
+    "APPCustomRDPport": {
+      "type": "int",
+      "metadata": {
+        "description": "Custom Port for APP between 50000 and 63000"
+      }
+    },
+    "WVDCustomRDPport": {
+      "type": "int",
+      "metadata": {
+        "description": "Custom Port for WVD between 50000 and 63000"
+      }
+    },
+    "clientName": {
+      "type": "string",
+      "defaultValue": "robortustest"
+    },
+    "vnetPrefix": {
+      "type": "string",
+      "defaultValue": "172.16.173"
+    },
+    "clientIP": {
+      "type": "string",
+      "defaultValue": "78.143.138.203"
+    },
+    "localGatewayAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.80.0/24",
+      "metadata": {
+        "description": "Local Network CIDR block eg: 192.168.10.0/24"
+      }
+    },
+    "sharedKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Gateway VPN Shared Key"
+      }
+    },
+    "domainName": {
+      "type": "string",
+      "defaultValue": "[format('ad.{0}.ie', parameters('clientName'))]"
+    },
+    "netBiosName": {
+      "type": "string",
+      "defaultValue": "rt"
+    },
+    "OUpath": {
+      "type": "string",
+      "defaultValue": "[format('DC=ad,DC={0},DC=ie', parameters('clientName'))]"
+    },
+    "officelocation": {
+      "type": "string",
+      "defaultValue": "Dublin"
+    },
+    "UPNsuffix": {
+      "type": "string",
+      "defaultValue": "robortustest.ie"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-rg', parameters('clientName'))]"
+    },
+    "WVDresourceGroupName": {
+      "type": "string",
+      "defaultValue": "[format('{0}-wvd-rg', parameters('clientName'))]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[format('{0}std', parameters('clientName'))]"
+    },
+    "DNSPort": {
+      "type": "string",
+      "defaultValue": "53"
+    },
+    "RDPPort": {
+      "type": "string",
+      "defaultValue": "3389"
+    },
+    "storageSKU": {
+      "type": "string",
+      "defaultValue": "Standard_LRS"
+    },
+    "storageKind": {
+      "type": "string",
+      "defaultValue": "Storage"
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "vnet"
+    },
+    "vnetaddressPrefix": {
+      "type": "string",
+      "defaultValue": "[format('{0}.0/24', parameters('vnetPrefix'))]"
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "[format('{0}.0/25', parameters('vnetPrefix'))]"
+    },
+    "gatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "[format('{0}.128/29', parameters('vnetPrefix'))]"
+    },
+    "wgSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "[format('{0}.144/29', parameters('vnetPrefix'))]"
+    },
+    "vnetLocation": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "subnet"
+    },
+    "gatewaySubnetName": {
+      "type": "string",
+      "defaultValue": "gatewaySubnet"
+    },
+    "wgSubnetName": {
+      "type": "string",
+      "defaultValue": "wireguardSubnet"
+    },
+    "nsgNAME": {
+      "type": "string",
+      "defaultValue": "NSG"
+    },
+    "LBname": {
+      "type": "string",
+      "defaultValue": "LB"
+    },
+    "APPLBName": {
+      "type": "string",
+      "defaultValue": "APP-LB"
+    },
+    "publicIPAddressName": {
+      "type": "string",
+      "defaultValue": "LB-PublicIP"
+    },
+    "APPpublicIPAddressName": {
+      "type": "string",
+      "defaultValue": "APP-LB-PublicIP"
+    },
+    "LBFEname": {
+      "type": "string",
+      "defaultValue": "LB-frontEnd"
+    },
+    "hostpoolName": {
+      "type": "string",
+      "defaultValue": "[format('{0}Hostpool', parameters('clientName'))]"
+    },
+    "hostpoolFriendlyName": {
+      "type": "string",
+      "defaultValue": "[format('{0} Cloud Desktop Hostpool', parameters('clientName'))]"
+    },
+    "appgroupName": {
+      "type": "string",
+      "defaultValue": "[format('{0}WVDAppGroup', parameters('clientName'))]"
+    },
+    "appgroupNameFriendlyName": {
+      "type": "string",
+      "defaultValue": "[format('{0} Cloud Desktop Appgroup', parameters('clientName'))]"
+    },
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "[format('{0}WVDWorkspace', parameters('clientName'))]"
+    },
+    "workspaceNameFriendlyName": {
+      "type": "string",
+      "defaultValue": "[format('{0} Cloud Desktop Workspace', parameters('clientName'))]"
+    },
+    "preferredAppGroupType": {
+      "type": "string",
+      "defaultValue": "Desktop"
+    },
+    "wvdbackplanelocation": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    },
+    "hostPoolType": {
+      "type": "string",
+      "defaultValue": "pooled"
+    },
+    "loadBalancerType": {
+      "type": "string",
+      "defaultValue": "BreadthFirst"
+    },
+    "logAnalyticsWorkspaceName": {
+      "type": "string",
+      "defaultValue": "LAWorkspace"
+    },
+    "storageaccountlocation": {
+      "type": "string",
+      "defaultValue": "northeurope"
+    },
+    "storageaccountName": {
+      "type": "string",
+      "defaultValue": "[format('{0}sa', parameters('clientName'))]"
+    },
+    "storageaccountkind": {
+      "type": "string",
+      "defaultValue": "FileStorage"
+    },
+    "storgeaccountglobalRedundancy": {
+      "type": "string",
+      "defaultValue": "Premium_LRS"
+    },
+    "fileshareFolderName": {
+      "type": "string",
+      "defaultValue": "fslogix-profilecontainers"
+    }
+  },
+  "functions": [],
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('WVDresourceGroupName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "DeployVMs",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "clientName": {
+            "value": "[parameters('clientName')]"
+          },
+          "storageAccountName": {
+            "value": "[parameters('storageAccountName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "storageKind": {
+            "value": "[parameters('storageKind')]"
+          },
+          "storageSKU": {
+            "value": "[parameters('storageSKU')]"
+          },
+          "vnetaddressPrefix": {
+            "value": "[parameters('vnetaddressPrefix')]"
+          },
+          "subnetPrefix": {
+            "value": "[parameters('subnetPrefix')]"
+          },
+          "gatewaySubnetPrefix": {
+            "value": "[parameters('gatewaySubnetPrefix')]"
+          },
+          "wgSubnetPrefix": {
+            "value": "[parameters('wgSubnetPrefix')]"
+          },
+          "wgSubnetName": {
+            "value": "[parameters('wgSubnetName')]"
+          },
+          "localGatewayAddressPrefix": {
+            "value": "[parameters('localGatewayAddressPrefix')]"
+          },
+          "sharedKey": {
+            "value": "[parameters('sharedKey')]"
+          },
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "subnetName": {
+            "value": "[parameters('subnetName')]"
+          },
+          "gatewaySubnetName": {
+            "value": "[parameters('gatewaySubnetName')]"
+          },
+          "nsgName": {
+            "value": "[parameters('nsgNAME')]"
+          },
+          "clientIP": {
+            "value": "[parameters('clientIP')]"
+          },
+          "publicIPAddressName": {
+            "value": "[parameters('publicIPAddressName')]"
+          },
+          "APPpublicIPAddressName": {
+            "value": "[parameters('APPpublicIPAddressName')]"
+          },
+          "LBname": {
+            "value": "[parameters('LBname')]"
+          },
+          "APPLBname": {
+            "value": "[parameters('APPLBName')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "vnetPrefix": {
+            "value": "[parameters('vnetPrefix')]"
+          },
+          "WGadminPassword": {
+            "value": "[parameters('WGadminPassword')]"
+          },
+          "WireguardConfNum": {
+            "value": "[parameters('WireguardConfNum')]"
+          },
+          "WireguardStartingIP": {
+            "value": "[parameters('WireguardStartingIP')]"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          },
+          "netBiosName": {
+            "value": "[parameters('netBiosName')]"
+          },
+          "officelocation": {
+            "value": "[parameters('officelocation')]"
+          },
+          "OUpath": {
+            "value": "[parameters('OUpath')]"
+          },
+          "UPNsuffix": {
+            "value": "[parameters('UPNsuffix')]"
+          },
+          "DC1CustomRDPport": {
+            "value": "[parameters('DC1CustomRDPport')]"
+          },
+          "DC2CustomRDPport": {
+            "value": "[parameters('DC2CustomRDPport')]"
+          },
+          "APPCustomRDPport": {
+            "value": "[parameters('APPCustomRDPport')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1.14562",
+              "templateHash": "18301944741805005718"
+            }
+          },
+          "parameters": {
+            "storageAccountName": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "storageSKU": {
+              "type": "string"
+            },
+            "storageKind": {
+              "type": "string"
+            },
+            "vnetName": {
+              "type": "string"
+            },
+            "vnetaddressPrefix": {
+              "type": "string"
+            },
+            "subnetPrefix": {
+              "type": "string"
+            },
+            "subnetName": {
+              "type": "string"
+            },
+            "gatewaySubnetPrefix": {
+              "type": "string"
+            },
+            "gatewaySubnetName": {
+              "type": "string"
+            },
+            "wgSubnetPrefix": {
+              "type": "string"
+            },
+            "wgSubnetName": {
+              "type": "string"
+            },
+            "localGatewayName": {
+              "type": "string",
+              "defaultValue": "[format('{0}-Network', parameters('clientName'))]"
+            },
+            "localGatewayAddressPrefix": {
+              "type": "string"
+            },
+            "localGatewayIpAddress": {
+              "type": "string",
+              "defaultValue": "[parameters('clientIP')]"
+            },
+            "gatewayPublicIPName": {
+              "type": "string",
+              "defaultValue": "gatewayPIP"
+            },
+            "gatewayName": {
+              "type": "string",
+              "defaultValue": "Gateway"
+            },
+            "connectionName": {
+              "type": "string",
+              "defaultValue": "[format('{0}Connection', parameters('clientName'))]"
+            },
+            "sharedKey": {
+              "type": "string"
+            },
+            "nsgName": {
+              "type": "string"
+            },
+            "clientIP": {
+              "type": "string"
+            },
+            "publicIPAddressName": {
+              "type": "string"
+            },
+            "APPpublicIPAddressName": {
+              "type": "string"
+            },
+            "LBname": {
+              "type": "string"
+            },
+            "DC1CustomRDPport": {
+              "type": "int"
+            },
+            "DC2CustomRDPport": {
+              "type": "int"
+            },
+            "APPLBname": {
+              "type": "string"
+            },
+            "APPCustomRDPport": {
+              "type": "int"
+            },
+            "localAdminUser": {
+              "type": "string",
+              "defaultValue": "localadmin"
+            },
+            "adminPassword": {
+              "type": "secureString"
+            },
+            "DC1name": {
+              "type": "string",
+              "defaultValue": "DC1-test"
+            },
+            "DC2name": {
+              "type": "string",
+              "defaultValue": "DC2-test"
+            },
+            "APPname": {
+              "type": "string",
+              "defaultValue": "APP-test"
+            },
+            "vmSize": {
+              "type": "string",
+              "defaultValue": "Standard_B1ms"
+            },
+            "vnetPrefix": {
+              "type": "string"
+            },
+            "DC1networkInterfaceName": {
+              "type": "string",
+              "defaultValue": "DC1interface"
+            },
+            "DC2networkInterfaceName": {
+              "type": "string",
+              "defaultValue": "DC2interface"
+            },
+            "APPnetworkInterfaceName": {
+              "type": "string",
+              "defaultValue": "APPinterface"
+            },
+            "DC1diagStorageAccountName": {
+              "type": "string",
+              "defaultValue": "[concat('dc1diags', uniqueString(resourceGroup().id))]"
+            },
+            "DC2diagStorageAccountName": {
+              "type": "string",
+              "defaultValue": "[concat('dc2diags', uniqueString(resourceGroup().id))]"
+            },
+            "APPdiagStorageAccountName": {
+              "type": "string",
+              "defaultValue": "[concat('appdiags', uniqueString(resourceGroup().id))]"
+            },
+            "DC1privateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.10', parameters('vnetPrefix'))]"
+            },
+            "DC2privateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.11', parameters('vnetPrefix'))]"
+            },
+            "APPprivateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.12', parameters('vnetPrefix'))]"
+            },
+            "WGvmName": {
+              "type": "string",
+              "defaultValue": "Wireguard"
+            },
+            "WGadminUsername": {
+              "type": "string",
+              "defaultValue": "ortusadmin"
+            },
+            "authenticationType": {
+              "type": "string",
+              "defaultValue": "password"
+            },
+            "wgPrivateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.148', parameters('vnetPrefix'))]"
+            },
+            "WireguardConfNum": {
+              "type": "string"
+            },
+            "WireguardStartingIP": {
+              "type": "string"
+            },
+            "WGadminPassword": {
+              "type": "string"
+            },
+            "dnsLabelPrefix": {
+              "type": "string",
+              "defaultValue": "[toLower(format('wireguard-123123123d-{0}', uniqueString(resourceGroup().id)))]"
+            },
+            "ubuntuOSVersion": {
+              "type": "string",
+              "defaultValue": "20_04-lts"
+            },
+            "WGvmSize": {
+              "type": "string",
+              "defaultValue": "Standard_F2s"
+            },
+            "networkSecurityGroupName": {
+              "type": "string",
+              "defaultValue": "WG-NSG"
+            },
+            "domainName": {
+              "type": "string"
+            },
+            "netBiosName": {
+              "type": "string"
+            },
+            "clientName": {
+              "type": "string"
+            },
+            "OUpath": {
+              "type": "string"
+            },
+            "officelocation": {
+              "type": "string"
+            },
+            "UPNsuffix": {
+              "type": "string"
+            },
+            "vaultName_var": {
+              "type": "string",
+              "defaultValue": "[format('{0}-Backup', parameters('clientName'))]",
+              "metadata": {
+                "description": "Name of the Vault"
+              }
+            },
+            "vmResourceGroup": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().name]",
+              "metadata": {
+                "description": "Resource group of Compute VM containing the workload"
+              }
+            },
+            "policyName": {
+              "type": "string",
+              "defaultValue": "AzureBackup",
+              "metadata": {
+                "description": "Backup Policy Name"
+              }
+            },
+            "wireguardRoute": {
+              "type": "string",
+              "defaultValue": "Wireguard"
+            },
+            "routeId": {
+              "type": "string",
+              "defaultValue": "default"
+            }
+          },
+          "functions": [],
+          "variables": {
+            "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('gatewaySubnetName'))]",
+            "subnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('subnetName'))]",
+            "wgSubnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('wgSubnetName'))]",
+            "availabilitySetNameVar": "AS",
+            "acceleratedNetworking": "True",
+            "WGpublicIPAddressName": "[format('{0}PublicIP', parameters('WGvmName'))]",
+            "networkInterfaceName": "[format('{0}NetInt', parameters('WGvmName'))]",
+            "osDiskType": "Standard_LRS",
+            "linuxConfiguration": {
+              "disablePasswordAuthentication": true,
+              "ssh": {
+                "publicKeys": [
+                  {
+                    "path": "[format('/home/{0}/.ssh/authorized_keys', parameters('WGadminUsername'))]",
+                    "keyData": "[parameters('WGadminPassword')]"
+                  }
+                ]
+              }
+            },
+            "backupFabric": "Azure",
+            "protectionContainer": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
+            "protectedItem": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
+            "testPolicy": "DefaultPoliy",
+            "BackupPolicyName": "[format('{0}/{1}', parameters('vaultName_var'), parameters('policyName'))]",
+            "wireguardPrefix": "10.200.200.0/24"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('storageAccountName')]",
+              "location": "[parameters('location')]",
+              "kind": "[parameters('storageKind')]",
+              "sku": {
+                "name": "[parameters('storageSKU')]"
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualnetworks",
+              "apiVersion": "2015-05-01-preview",
+              "name": "[parameters('vnetName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('vnetaddressPrefix')]"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "[parameters('subnetName')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('subnetPrefix')]"
+                    }
+                  },
+                  {
+                    "name": "[parameters('gatewaySubnetName')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('gatewaySubnetPrefix')]"
+                    }
+                  },
+                  {
+                    "name": "[parameters('wgSubnetName')]",
+                    "properties": {
+                      "addressPrefix": "[parameters('wgSubnetPrefix')]",
+                      "routeTable": {
+                        "id": "[resourceId('Microsoft.Network/routeTables', parameters('wireguardRoute'))]"
+                      }
+                    }
+                  }
+                ],
+                "dhcpOptions": {
+                  "dnsServers": [
+                    "[parameters('DC1privateIP')]",
+                    "[parameters('DC2privateIP')]",
+                    "8.8.8.8"
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('wireguardRoute'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/localNetworkGateways",
+              "apiVersion": "2015-05-01-preview",
+              "name": "[parameters('localGatewayName')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "localNetworkAddressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('localGatewayAddressPrefix')]"
+                  ]
+                },
+                "gatewayIpAddress": "[parameters('localGatewayIpAddress')]"
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2015-05-01-preview",
+              "name": "[parameters('gatewayPublicIPName')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualnetworkgateways",
+              "apiVersion": "2015-05-01-preview",
+              "name": "[parameters('gatewayName')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "properties": {
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                        "id": "[variables('gatewaySubnetRef')]"
+                      },
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewayPublicIPName'))]"
+                      }
+                    },
+                    "name": "vnetGatewayConfig"
+                  }
+                ],
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewayPublicIPName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/connections",
+              "apiVersion": "2015-06-15",
+              "name": "[parameters('connectionName')]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "virtualNetworkGateway1": {
+                  "id": "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]"
+                },
+                "localNetworkGateway2": {
+                  "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
+                },
+                "connectionType": "IPsec",
+                "routingWeight": 10,
+                "sharedKey": "[parameters('sharedKey')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]",
+                "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('nsgName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "OrtusCloud-allow-rdp",
+                    "properties": {
+                      "priority": 101,
+                      "sourceAddressPrefix": "13.69.144.194",
+                      "protocol": "*",
+                      "destinationPortRange": "3389",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*"
+                    }
+                  },
+                  {
+                    "name": "OrtusDublin-allow-rdp",
+                    "properties": {
+                      "priority": 102,
+                      "sourceAddressPrefix": "78.143.138.203",
+                      "protocol": "*",
+                      "destinationPortRange": "3389",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*"
+                    }
+                  },
+                  {
+                    "name": "ClientDNSrule",
+                    "properties": {
+                      "priority": 103,
+                      "sourceAddressPrefix": "[parameters('clientIP')]",
+                      "protocol": "*",
+                      "destinationPortRange": "53",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('publicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('APPpublicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
+              "type": "Microsoft.Network/loadBalancers",
+              "apiVersion": "2018-10-01",
+              "name": "[parameters('LBname')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "frontendIPConfigurations": [
+                  {
+                    "name": "LBFE",
+                    "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+                      }
+                    }
+                  }
+                ],
+                "backendAddressPools": [
+                  {
+                    "name": "LBBAP"
+                  }
+                ],
+                "inboundNatRules": [
+                  {
+                    "name": "DC1-RDP-TCP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
+                      },
+                      "protocol": "Tcp",
+                      "frontendPort": "[parameters('DC1CustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  },
+                  {
+                    "name": "DC1-RDP-UDP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
+                      },
+                      "protocol": "Udp",
+                      "frontendPort": "[parameters('DC1CustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  },
+                  {
+                    "name": "DC2-RDP-TCP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
+                      },
+                      "protocol": "Tcp",
+                      "frontendPort": "[parameters('DC2CustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  },
+                  {
+                    "name": "DC2-RDP-UDP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
+                      },
+                      "protocol": "Udp",
+                      "frontendPort": "[parameters('DC2CustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/loadBalancers",
+              "apiVersion": "2018-10-01",
+              "name": "[parameters('APPLBname')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "frontendIPConfigurations": [
+                  {
+                    "name": "APPLBFE",
+                    "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('APPpublicIPAddressName'))]"
+                      }
+                    }
+                  }
+                ],
+                "backendAddressPools": [
+                  {
+                    "name": "APPLBBAP"
+                  }
+                ],
+                "inboundNatRules": [
+                  {
+                    "name": "APP-RDP-TCP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
+                      },
+                      "protocol": "Tcp",
+                      "frontendPort": "[parameters('APPCustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  },
+                  {
+                    "name": "APP-RDP-UDP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
+                      },
+                      "protocol": "Udp",
+                      "frontendPort": "[parameters('APPCustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('APPpublicIPAddressName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/availabilitySets",
+              "apiVersion": "2020-12-01",
+              "name": "[variables('availabilitySetNameVar')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Aligned"
+              },
+              "properties": {
+                "platformFaultDomainCount": 2,
+                "platformUpdateDomainCount": 5
+              }
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('DC1networkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('DC1privateIP')]",
+                      "loadBalancerBackendAddressPools": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('LBname'), 'LBBAP')]"
+                        }
+                      ],
+                      "loadBalancerInboundNatRules": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('LBname'), 'DC1-RDP-TCP')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('LBname'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('DC2networkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('DC2privateIP')]",
+                      "loadBalancerBackendAddressPools": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('LBname'), 'LBBAP')]"
+                        }
+                      ],
+                      "loadBalancerInboundNatRules": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('LBname'), 'DC2-RDP-TCP')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('LBname'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('APPnetworkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('APPprivateIP')]",
+                      "loadBalancerBackendAddressPools": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('APPLBname'), 'APPLBBAP')]"
+                        }
+                      ],
+                      "loadBalancerInboundNatRules": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('APPLBname'), 'APP-RDP-TCP')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('APPLBname'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('DC1name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "osProfile": {
+                  "computerName": "[parameters('DC1name')]",
+                  "adminUsername": "[parameters('localAdminUser')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true
+                  }
+                },
+                "availabilitySet": {
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetNameVar'))]"
+                },
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "DC1-osdisk",
+                    "createOption": "FromImage",
+                    "diskSizeGB": 64,
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    }
+                  },
+                  "dataDisks": [
+                    {
+                      "name": "DC1-datadisk",
+                      "diskSizeGB": 32,
+                      "lun": 0,
+                      "createOption": "Empty",
+                      "managedDisk": {
+                        "storageAccountType": "Standard_LRS"
+                      }
+                    }
+                  ]
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "properties": {
+                        "primary": true
+                      },
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('DC1networkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC1diagStorageAccountName'))).primaryEndpoints.blob]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('DC1diagStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('DC1networkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('DC1diagStorageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage"
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('DC2name')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "osProfile": {
+                  "computerName": "[parameters('DC2name')]",
+                  "adminUsername": "[parameters('localAdminUser')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true
+                  }
+                },
+                "availabilitySet": {
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetNameVar'))]"
+                },
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "DC2-osdisk",
+                    "createOption": "FromImage",
+                    "diskSizeGB": 64,
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    }
+                  },
+                  "dataDisks": [
+                    {
+                      "name": "DC2-datadisk",
+                      "diskSizeGB": 32,
+                      "lun": 0,
+                      "createOption": "Empty",
+                      "managedDisk": {
+                        "storageAccountType": "Standard_LRS"
+                      }
+                    }
+                  ]
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "properties": {
+                        "primary": true
+                      },
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('DC2networkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC2diagStorageAccountName'))).primaryEndpoints.blob]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('DC2diagStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('DC2networkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('DC2diagStorageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage"
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('APPname')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "osProfile": {
+                  "computerName": "[parameters('APPname')]",
+                  "adminUsername": "[parameters('localAdminUser')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true
+                  }
+                },
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2019-Datacenter-smalldisk",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "APP-osdisk",
+                    "createOption": "FromImage",
+                    "diskSizeGB": 64,
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    }
+                  },
+                  "dataDisks": [
+                    {
+                      "name": "APP-datadisk1",
+                      "diskSizeGB": 128,
+                      "lun": 0,
+                      "createOption": "Empty",
+                      "managedDisk": {
+                        "storageAccountType": "Premium_LRS"
+                      }
+                    }
+                  ]
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "properties": {
+                        "primary": true
+                      },
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('APPnetworkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('APPdiagStorageAccountName'))).primaryEndpoints.blob]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('APPdiagStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('APPnetworkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('APPdiagStorageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage"
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[variables('networkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[variables('wgSubnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('wgPrivateIP')]",
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]"
+                      }
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                },
+                "enableAcceleratedNetworking": true
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('networkSecurityGroupName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "SSH",
+                    "properties": {
+                      "priority": 1000,
+                      "protocol": "Tcp",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "13.69.144.194",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "22"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[variables('WGpublicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "dnsSettings": {
+                  "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                },
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('WGvmName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "hardwareProfile": {
+                  "vmSize": "[parameters('WGvmSize')]"
+                },
+                "storageProfile": {
+                  "osDisk": {
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                      "storageAccountType": "[variables('osDiskType')]"
+                    }
+                  },
+                  "imageReference": {
+                    "publisher": "Canonical",
+                    "offer": "0001-com-ubuntu-server-focal",
+                    "sku": "[parameters('ubuntuOSVersion')]",
+                    "version": "latest"
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "osProfile": {
+                  "computerName": "[parameters('WGvmName')]",
+                  "adminUsername": "[parameters('WGadminUsername')]",
+                  "adminPassword": "[parameters('WGadminPassword')]",
+                  "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), null(), variables('linuxConfiguration'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[format('{0}/WinRMCustomScriptExtension', parameters('DC1name'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "settings": {
+                  "fileUris": [
+                    "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1.ps1"
+                  ],
+                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC1.ps1 {0} {1} {2} {3} {4} {5} {6}', parameters('domainName'), parameters('netBiosName'), parameters('adminPassword'), parameters('OUpath'), parameters('clientName'), parameters('officelocation'), parameters('UPNsuffix'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[format('{0}/WinRMCustomScriptExtension', parameters('DC2name'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "settings": {
+                  "fileUris": [
+                    "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC2.ps1"
+                  ],
+                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC2.ps1 {0} {1}', parameters('domainName'), parameters('adminPassword'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[1])]",
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[format('{0}/WinRMCustomScriptExtension', parameters('APPname'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "settings": {
+                  "fileUris": [
+                    "https://ortusmediastorage.blob.core.windows.net/public/ConfigAPP.ps1"
+                  ],
+                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigAPP.ps1 {0} {1} {2} {3}', parameters('domainName'), parameters('OUpath'), parameters('clientName'), parameters('adminPassword'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[format('{0}/wireguard', parameters('WGvmName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "https://github.com/Ortus-Ireland/New-WG-Deployment/blob/33d2d910bcf211b8f37349bbe06285337f1369d5/wireguardInstall.sh"
+                  ],
+                  "commandToExecute": "[format('sudo sh wg-init.sh {0} {1} {2} {3} {4} {5}', parameters('WireguardConfNum'), parameters('WireguardStartingIP'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))).ipAddress, parameters('WGadminUsername'), parameters('DC1privateIP'), parameters('DC2privateIP'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('WGvmName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults",
+              "apiVersion": "2020-02-02",
+              "name": "[parameters('vaultName_var')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "RS0",
+                "tier": "Standard"
+              },
+              "properties": {}
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults/backupstorageconfig",
+              "apiVersion": "2018-12-20",
+              "name": "[format('{0}/vaultstorageconfig', parameters('vaultName_var'))]",
+              "properties": {
+                "storageModelType": "LocallyRedundant",
+                "crossRegionRestoreFlag": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+              "apiVersion": "2020-02-02",
+              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainer'), variables('protectedItem'))]",
+              "properties": {
+                "protectedItemType": "Microsoft.Compute/virtualMachines",
+                "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]",
+                "sourceResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[1])]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+              "apiVersion": "2020-12-01",
+              "name": "[variables('BackupPolicyName')]",
+              "properties": {
+                "backupManagementType": "AzureIaasVM",
+                "timeZone": "GMT Standard Time",
+                "instantRpRetentionRangeInDays": 2,
+                "schedulePolicy": {
+                  "schedulePolicyType": "SimpleSchedulePolicy",
+                  "scheduleRunFrequency": "Daily",
+                  "scheduleRunTimes": [
+                    "2021-04-07T03:00:00.000Z"
+                  ]
+                },
+                "retentionPolicy": {
+                  "dailySchedule": {
+                    "retentionTimes": [
+                      "2021-04-07T03:00:00.000Z"
+                    ],
+                    "retentionDuration": {
+                      "count": 180,
+                      "durationType": "Days"
+                    }
+                  },
+                  "weeklySchedule": {
+                    "daysOfTheWeek": [
+                      "Sunday"
+                    ],
+                    "retentionTimes": [
+                      "2021-04-07T03:00:00.000Z"
+                    ],
+                    "retentionDuration": {
+                      "count": 12,
+                      "durationType": "Weeks"
+                    }
+                  },
+                  "monthlySchedule": {
+                    "retentionScheduleFormatType": "Weekly",
+                    "retentionScheduleWeekly": {
+                      "daysOfTheWeek": [
+                        "Sunday"
+                      ],
+                      "weeksOfTheMonth": [
+                        "First"
+                      ]
+                    },
+                    "retentionTimes": [
+                      "2021-04-07T03:00:00.000Z"
+                    ],
+                    "retentionDuration": {
+                      "count": 60,
+                      "durationType": "Months"
+                    }
+                  },
+                  "yearlySchedule": {
+                    "retentionScheduleFormatType": "Weekly",
+                    "monthsOfYear": [
+                      "January"
+                    ],
+                    "retentionScheduleWeekly": {
+                      "daysOfTheWeek": [
+                        "Sunday"
+                      ],
+                      "weeksOfTheMonth": [
+                        "First"
+                      ]
+                    },
+                    "retentionTimes": [
+                      "2021-04-07T03:00:00.000Z"
+                    ],
+                    "retentionDuration": {
+                      "count": 7,
+                      "durationType": "Years"
+                    }
+                  },
+                  "retentionPolicyType": "LongTermRetentionPolicy"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/routeTables",
+              "apiVersion": "2020-07-01",
+              "name": "[parameters('wireguardRoute')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "routes": [
+                  {
+                    "id": "[parameters('routeId')]",
+                    "properties": {
+                      "addressPrefix": "[variables('wireguardPrefix')]",
+                      "nextHopType": "VirtualAppliance",
+                      "nextHopIpAddress": "[parameters('wgPrivateIP')]"
+                    },
+                    "name": "[parameters('routeId')]"
+                  }
+                ],
+                "disableBgpRoutePropagation": false
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "DeployWVD",
+      "resourceGroup": "[parameters('WVDresourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "hostpoolName": {
+            "value": "[parameters('hostpoolName')]"
+          },
+          "hostpoolFriendlyName": {
+            "value": "[parameters('hostpoolFriendlyName')]"
+          },
+          "appgroupName": {
+            "value": "[parameters('appgroupName')]"
+          },
+          "appgroupNameFriendlyName": {
+            "value": "[parameters('appgroupNameFriendlyName')]"
+          },
+          "workspaceName": {
+            "value": "[parameters('workspaceName')]"
+          },
+          "workspaceNameFriendlyName": {
+            "value": "[parameters('workspaceNameFriendlyName')]"
+          },
+          "preferredAppGroupType": {
+            "value": "[parameters('preferredAppGroupType')]"
+          },
+          "wvdbackplanelocation": {
+            "value": "[parameters('wvdbackplanelocation')]"
+          },
+          "hostPoolType": {
+            "value": "[parameters('hostPoolType')]"
+          },
+          "loadBalancerType": {
+            "value": "[parameters('loadBalancerType')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1.14562",
+              "templateHash": "15833990748085376374"
+            }
+          },
+          "parameters": {
+            "hostpoolName": {
+              "type": "string"
+            },
+            "hostpoolFriendlyName": {
+              "type": "string"
+            },
+            "appgroupName": {
+              "type": "string"
+            },
+            "appgroupNameFriendlyName": {
+              "type": "string"
+            },
+            "workspaceName": {
+              "type": "string"
+            },
+            "workspaceNameFriendlyName": {
+              "type": "string"
+            },
+            "applicationgrouptype": {
+              "type": "string",
+              "defaultValue": "Desktop"
+            },
+            "preferredAppGroupType": {
+              "type": "string",
+              "defaultValue": "Desktop"
+            },
+            "wvdbackplanelocation": {
+              "type": "string",
+              "defaultValue": "northeurope"
+            },
+            "hostPoolType": {
+              "type": "string",
+              "defaultValue": "pooled"
+            },
+            "loadBalancerType": {
+              "type": "string",
+              "defaultValue": "BreadthFirst"
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.DesktopVirtualization/hostPools",
+              "apiVersion": "2019-12-10-preview",
+              "name": "[parameters('hostpoolName')]",
+              "location": "[parameters('wvdbackplanelocation')]",
+              "properties": {
+                "friendlyName": "[parameters('hostpoolFriendlyName')]",
+                "hostPoolType": "[parameters('hostPoolType')]",
+                "loadBalancerType": "[parameters('loadBalancerType')]",
+                "preferredAppGroupType": "[parameters('preferredAppGroupType')]"
+              }
+            },
+            {
+              "type": "Microsoft.DesktopVirtualization/applicationGroups",
+              "apiVersion": "2019-12-10-preview",
+              "name": "[parameters('appgroupName')]",
+              "location": "[parameters('wvdbackplanelocation')]",
+              "properties": {
+                "friendlyName": "[parameters('appgroupNameFriendlyName')]",
+                "applicationGroupType": "[parameters('applicationgrouptype')]",
+                "hostPoolArmPath": "[resourceId('Microsoft.DesktopVirtualization/hostPools', parameters('hostpoolName'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DesktopVirtualization/hostPools', parameters('hostpoolName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DesktopVirtualization/workspaces",
+              "apiVersion": "2019-12-10-preview",
+              "name": "[parameters('workspaceName')]",
+              "location": "[parameters('wvdbackplanelocation')]",
+              "properties": {
+                "friendlyName": "[parameters('workspaceNameFriendlyName')]",
+                "applicationGroupReferences": [
+                  "[resourceId('Microsoft.DesktopVirtualization/applicationGroups', parameters('appgroupName'))]"
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DesktopVirtualization/applicationGroups', parameters('appgroupName'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('WVDresourceGroupName'))]"
+      ]
+    }
+  ]
+}
