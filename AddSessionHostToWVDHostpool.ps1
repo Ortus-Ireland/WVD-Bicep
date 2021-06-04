@@ -220,3 +220,10 @@ Log "Calling functions to install agent and bootloader"
 InstallRDAgents -AgentBootServiceInstallerFolder $RootFolder -AgentInstallerFolder $RootFolder -RegistrationToken $registrationKey -EnableVerboseMsiLogging:$false
 
 Log "Finished"
+
+
+
+### Code to create a registration key
+
+$Registered = New-AzWvdRegistrationInfo -SubscriptionId $azureSubscriptionID -ResourceGroupName $resourceGroupName -HostPoolName $existingWVDHostPoolName -ExpirationTime (Get-Date).AddHours(4) -ErrorAction SilentlyContinue
+$RdsRegistrationInfotoken = $Registered.Token

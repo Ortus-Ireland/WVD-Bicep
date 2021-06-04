@@ -1,3 +1,10 @@
+//// To DO
+//
+// 1. Create WVD Load Balancer
+// 2. Create WVD SessionHost
+// 3. Create Extension to Add SessionHost to HostPool
+// 4. Update ps1 file for adding session host to host pool
+
 //////////////////////////////////////////////////
 ///
 ///  Storage Account Creation
@@ -271,6 +278,28 @@ resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
     name: 'Basic'
   }
 }
+
+//////////////////////////////////////////////////
+///
+///  Public IP for WVD Load Balancer
+///
+/////////////////////////////////////////////////
+
+param WVDpublicIPAddressName string
+
+resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: WVDpublicIPAddressName
+  location: location
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'
+    idleTimeoutInMinutes: 4
+  }
+  sku: {
+    name: 'Basic'
+  }
+}
+
 
 
 //////////////////////////////////////////////////
