@@ -15,7 +15,6 @@ param adminPassword string
 param WGadminPassword string
 param WireguardConfNum string
 param WireguardStartingIP string
-param allowedIPs string
 
 @description('Custom Port for DC1 between 50000 and 63000')
 param DC1CustomRDPport int
@@ -156,7 +155,6 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     WGadminPassword: WGadminPassword
     WireguardConfNum: WireguardConfNum
     WireguardStartingIP: WireguardStartingIP
-    allowedIPs: allowedIPs
     domainName: domainName
     netBiosName: netBiosName
     officelocation: officelocation

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "14605828279094664295"
+      "templateHash": "1373413921039365589"
     }
   },
   "parameters": {
@@ -388,7 +388,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "18301944741805005718"
+              "templateHash": "13636394655844066157"
             }
           },
           "parameters": {
@@ -465,6 +465,10 @@
             },
             "APPpublicIPAddressName": {
               "type": "string"
+            },
+            "WVDpublicIPAddressName": {
+              "type": "string",
+              "defaultValue": "WVD-PIP"
             },
             "LBname": {
               "type": "string"
@@ -558,6 +562,10 @@
             "wgPrivateIP": {
               "type": "string",
               "defaultValue": "[format('{0}.148', parameters('vnetPrefix'))]"
+            },
+            "allowedIPs": {
+              "type": "string",
+              "defaultValue": "[format('{0}.0/24', parameters('vnetPrefix'))]"
             },
             "WireguardConfNum": {
               "type": "string"
@@ -857,6 +865,20 @@
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2020-06-01",
               "name": "[parameters('APPpublicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('WVDpublicIPAddressName')]",
               "location": "[parameters('location')]",
               "properties": {
                 "publicIPAllocationMethod": "Static",
@@ -1549,9 +1571,9 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://github.com/Ortus-Ireland/New-WG-Deployment/blob/33d2d910bcf211b8f37349bbe06285337f1369d5/wireguardInstall.sh"
+                    "https://raw.githubusercontent.com/Ortus-Ireland/wgConfig/main/wg-init.sh"
                   ],
-                  "commandToExecute": "[format('sudo sh wg-init.sh {0} {1} {2} {3} {4} {5}', parameters('WireguardConfNum'), parameters('WireguardStartingIP'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))).ipAddress, parameters('WGadminUsername'), parameters('DC1privateIP'), parameters('DC2privateIP'))]"
+                  "commandToExecute": "[format('sudo sh wg-init.sh {0} {1} {2} {3} {4} {5} {6}', parameters('WireguardConfNum'), parameters('WireguardStartingIP'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))).ipAddress, parameters('WGadminUsername'), parameters('DC1privateIP'), parameters('DC2privateIP'), parameters('allowedIPs'))]"
                 }
               },
               "dependsOn": [

@@ -872,7 +872,7 @@ param WGvmName string = 'Wireguard'
 param WGadminUsername string = 'ortusadmin'
 param authenticationType string = 'password'
 param wgPrivateIP string = '${vnetPrefix}.148'
-param allowedIPs string
+param allowedIPs string = '${vnetPrefix}.0/24'
 param WireguardConfNum string
 param WireguardStartingIP string
 param WGadminPassword string
