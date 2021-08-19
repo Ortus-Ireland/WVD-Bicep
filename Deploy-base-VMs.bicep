@@ -1,3 +1,10 @@
+//// To DO
+//
+// 1. Create WVD Load Balancer
+// 2. Create WVD SessionHost
+// 3. Create Extension to Add SessionHost to HostPool
+// 4. Update ps1 file for adding session host to host pool
+
 //////////////////////////////////////////////////
 ///
 ///  Storage Account Creation
@@ -271,6 +278,28 @@ resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
     name: 'Basic'
   }
 }
+
+//////////////////////////////////////////////////
+///
+///  Public IP for WVD Load Balancer
+///
+/////////////////////////////////////////////////
+
+param WVDpublicIPAddressName string = 'WVD-PIP'
+
+resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: WVDpublicIPAddressName
+  location: location
+  properties: {
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'
+    idleTimeoutInMinutes: 4
+  }
+  sku: {
+    name: 'Basic'
+  }
+}
+
 
 
 //////////////////////////////////////////////////
@@ -843,6 +872,7 @@ param WGvmName string = 'Wireguard'
 param WGadminUsername string = 'ortusadmin'
 param authenticationType string = 'password'
 param wgPrivateIP string = '${vnetPrefix}.148'
+param allowedIPs string = '${vnetPrefix}.0/24'
 param WireguardConfNum string
 param WireguardStartingIP string
 param WGadminPassword string
@@ -1053,6 +1083,7 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
   dependsOn: [
     WGvm
   ]
+  
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
     type: 'CustomScript'
@@ -1060,12 +1091,14 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
     autoUpgradeMinorVersion: true
     settings: {
       fileUris: [
-        'https://github.com/Ortus-Ireland/New-WG-Deployment/blob/33d2d910bcf211b8f37349bbe06285337f1369d5/wireguardInstall.sh'
+        'https://raw.githubusercontent.com/Ortus-Ireland/wgConfig/main/wg-init.sh'
       ]
-      commandToExecute: 'sudo sh wg-init.sh ${WireguardConfNum} ${WireguardStartingIP} ${publicIP.properties.ipAddress} ${WGadminUsername} ${DC1privateIP} ${DC2privateIP}'
+      commandToExecute: 'sudo sh wg-init.sh ${WireguardConfNum} ${WireguardStartingIP} ${publicIP.properties.ipAddress} ${WGadminUsername} ${DC1privateIP} ${DC2privateIP} ${allowedIPs}'
+      // commandToExecute: 'sudo apt install git && git config --global user.name "RealDeclan" && git config --global user.email "ddunne@ortus.ie && git clone https://github.com/Ortus-Ireland/WG-Deploy-VM-Bicep.git"'
     }
   }
 }
+
 
 //////////////////////////////////////////////////
 ///

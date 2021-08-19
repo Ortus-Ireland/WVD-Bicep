@@ -10,6 +10,9 @@ Wireguard VM - Execution Script - Dec
 WVD Host - Quickstart 
 Seperate Subnet for Wireguard
 Route tables - added, need to associate subnet
+<<<<<<< HEAD
 
 
 test
+=======
+>>>>>>> ff960555a33227b1c1e1fa038e7ca46b214572a2
