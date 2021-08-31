@@ -1,10 +1,3 @@
-//// To DO
-//
-// 1. Create WVD Load Balancer
-// 2. Create WVD SessionHost
-// 3. Create Extension to Add SessionHost to HostPool
-// 4. Update ps1 file for adding session host to host pool
-
 //////////////////////////////////////////////////
 ///
 ///  Storage Account Creation
@@ -15,7 +8,6 @@ param storageAccountName string
 param location string
 param storageSKU string
 param storageKind string
-
 
 resource sa 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   name : storageAccountName
@@ -32,14 +24,15 @@ resource sa 'Microsoft.Storage/storageAccounts@2019-06-01' = {
 ///
 /////////////////////////////////////////////////
 
-param vnetName string
+param vnetName string = 'vnet'
 param vnetaddressPrefix string
 param subnetPrefix string
-param subnetName string 
+param subnetName string = 'subnet'
 param gatewaySubnetPrefix string
-param gatewaySubnetName string
+param gatewaySubnetName string = 'gatewaySubnet'
 param wgSubnetPrefix string
-param wgSubnetName string
+param wgSubnetName string = 'wireguardSubnet'
+param clientIP string
 
 resource vnet 'Microsoft.Network/virtualnetworks@2015-05-01-preview' = {
   name: vnetName
@@ -185,8 +178,8 @@ resource connectionName_resource 'Microsoft.Network/connections@2015-06-15' = {
 ///
 /////////////////////////////////////////////////
 
-param nsgName string
-param clientIP string
+param nsgName string = 'NSG'
+
 
 resource nsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
   name: nsgName
@@ -220,9 +213,35 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
         }
       }
       {
-        name: 'ClientDNSrule'
+        name: 'OrtusPreston-allow-rdp'
         properties: {
           priority: 103
+          sourceAddressPrefix: '86.47.40.84'
+          protocol: '*'
+          destinationPortRange: '3389'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'OrtusMonor-allow-rdp'
+        properties: {
+          priority: 104
+          sourceAddressPrefix: '83.70.173.185'
+          protocol: '*'
+          destinationPortRange: '3389'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'ClientDNSrule'
+        properties: {
+          priority: 105
           sourceAddressPrefix: clientIP
           protocol: '*'
           destinationPortRange: '53'
@@ -243,7 +262,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
 ///
 /////////////////////////////////////////////////
 
-param publicIPAddressName string
+param publicIPAddressName string = 'LB-PublicIP'
 
 resource pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   name: publicIPAddressName
@@ -264,7 +283,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 ///
 /////////////////////////////////////////////////
 
-param APPpublicIPAddressName string
+param APPpublicIPAddressName string = 'APP-LB-PublicIP'
 
 resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   name: APPpublicIPAddressName
@@ -308,7 +327,7 @@ resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 ///
 /////////////////////////////////////////////////
 
-param LBname string
+param LBname string = 'LB'
 param DC1CustomRDPport int
 param DC2CustomRDPport int
   
@@ -393,7 +412,7 @@ resource Loadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
 ///
 /////////////////////////////////////////////////
 
-param APPLBname string
+param APPLBname string = 'APP-LB'
 param APPCustomRDPport int
   
 resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
@@ -1083,7 +1102,6 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
   dependsOn: [
     WGvm
   ]
-  
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
     type: 'CustomScript'
@@ -1098,7 +1116,6 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
     }
   }
 }
-
 
 //////////////////////////////////////////////////
 ///
@@ -1116,8 +1133,12 @@ param vmResourceGroup string = resourceGroup().name
 param policyName string = 'AzureBackup'
 
 var backupFabric = 'Azure'
-var protectionContainer = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
-var protectedItem = 'vm;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
+
+var protectionContainerDC1 = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
+var protectedItemDC1 = 'vm;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
+var protectionContainerAPP = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${APPname}'
+var protectedItemAPP = 'vm;iaasvmcontainerv2;${resourceGroup().name};${APPname}'
+
 var testPolicy = 'DefaultPoliy'
 
 resource vaultName 'Microsoft.RecoveryServices/vaults@2020-02-02' = {
@@ -1142,11 +1163,24 @@ resource vaultName_vaultstorageconfig 'Microsoft.RecoveryServices/vaults/backups
 }
 
 resource vaultName_backupFabric_protectionContainer_protectedItem 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2020-02-02' = {
-  name: '${vaultName_var}/${backupFabric}/${protectionContainer}/${protectedItem}'
+  name: '${vaultName_var}/${backupFabric}/${protectionContainerDC1}/${protectedItemDC1}'
   properties: {
     protectedItemType: 'Microsoft.Compute/virtualMachines'
     policyId: vaultName_policyName.id
     sourceResourceId: DC1vm.id
+  }
+  dependsOn: [
+    vaultName
+    DC2vmName_WinRMCustomScriptExtension
+  ]
+}
+
+resource vaultName_backupFabric_protectionContainer_protectedItemAPP 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2020-02-02' = {
+  name: '${vaultName_var}/${backupFabric}/${protectionContainerAPP}/${protectedItemAPP}'
+  properties: {
+    protectedItemType: 'Microsoft.Compute/virtualMachines'
+    policyId: vaultName_policyName.id
+    sourceResourceId: APPvm.id
   }
   dependsOn: [
     vaultName

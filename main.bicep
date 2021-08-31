@@ -6,6 +6,13 @@ targetScope = 'subscription'
 ///
 /////////////////////////////////////////////////
 
+@description('Update to match Client ** use lower case **')
+param clientName string 
+@description('Prefix for client vnet eg: 172.16.173 ** check subnet file for next available **')
+param vnetPrefix string
+@description('External client IP')
+param clientIP string
+
 @secure()
 @description('VM local Admin Password')
 param adminPassword string
@@ -13,7 +20,9 @@ param adminPassword string
 @secure()
 @description('Wireguard Admin Password')
 param WGadminPassword string
+@description('Number of conf files required')
 param WireguardConfNum string
+@description('Starting IP for clients eg: 10')
 param WireguardStartingIP string
 
 @description('Custom Port for DC1 between 50000 and 63000')
@@ -25,10 +34,6 @@ param APPCustomRDPport int
 @description('Custom Port for WVD between 50000 and 63000')
 param WVDCustomRDPport int
 
-param clientName string = 'robortustest'
-param vnetPrefix string = '172.16.173'
-param clientIP string = '78.143.138.203'
-
 @description('Local Network CIDR block eg: 192.168.10.0/24')
 param localGatewayAddressPrefix string = '192.168.80.0/24'
 
@@ -39,7 +44,7 @@ param domainName string = 'ad.${clientName}.ie'
 param netBiosName string = 'rt'
 param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
 param officelocation string = 'Dublin'
-param UPNsuffix string = 'robortustest.ie'
+param UPNsuffix string = '${clientName}.ie'
 
 //Define Backend VM parameters
 
@@ -58,21 +63,10 @@ param storageKind string = 'Storage'
 ///
 /////////////////////////////////////////////////
 
-param vnetName string = 'vnet'
 param vnetaddressPrefix string ='${vnetPrefix}.0/24'
 param subnetPrefix string = '${vnetPrefix}.0/25'
 param gatewaySubnetPrefix string = '${vnetPrefix}.128/29'
 param wgSubnetPrefix string = '${vnetPrefix}.144/29'
-param vnetLocation string = 'northeurope'
-param subnetName string = 'subnet'
-param gatewaySubnetName string = 'gatewaySubnet'
-param wgSubnetName string = 'wireguardSubnet'
-param nsgNAME string = 'NSG'
-param LBname string = 'LB'
-param APPLBName string = 'APP-LB'
-param publicIPAddressName string = 'LB-PublicIP'
-param APPpublicIPAddressName string = 'APP-LB-PublicIP'
-param LBFEname string = 'LB-frontEnd'
 
 //////////////////////////////////////////////////
 ///
@@ -86,11 +80,6 @@ param appgroupName string = '${clientName}WVDAppGroup'
 param appgroupNameFriendlyName string = '${clientName} Cloud Desktop Appgroup'
 param workspaceName string = '${clientName}WVDWorkspace'
 param workspaceNameFriendlyName string = '${clientName} Cloud Desktop Workspace'
-param preferredAppGroupType string = 'Desktop'
-param wvdbackplanelocation string = 'northeurope'
-param hostPoolType string = 'pooled'
-param loadBalancerType string = 'BreadthFirst'
-param logAnalyticsWorkspaceName string = 'LAWorkspace'         
 
 //////////////////////////////////////////////////
 ///
@@ -138,18 +127,9 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     subnetPrefix: subnetPrefix
     gatewaySubnetPrefix: gatewaySubnetPrefix
     wgSubnetPrefix: wgSubnetPrefix
-    wgSubnetName: wgSubnetName
     localGatewayAddressPrefix: localGatewayAddressPrefix
     sharedKey: sharedKey
-    vnetName: vnetName
-    subnetName: subnetName
-    gatewaySubnetName: gatewaySubnetName
-    nsgName: nsgNAME
     clientIP: clientIP  
-    publicIPAddressName: publicIPAddressName
-    APPpublicIPAddressName: APPpublicIPAddressName
-    LBname: LBname
-    APPLBname: APPLBName
     adminPassword: adminPassword
     vnetPrefix: vnetPrefix
     WGadminPassword: WGadminPassword
@@ -179,11 +159,6 @@ module DeployWVD 'Deploy-WVD-VMs.bicep' = {
     appgroupNameFriendlyName: appgroupNameFriendlyName
     workspaceName: workspaceName
     workspaceNameFriendlyName: workspaceNameFriendlyName
-    preferredAppGroupType: preferredAppGroupType
-    wvdbackplanelocation: wvdbackplanelocation
-    hostPoolType: hostPoolType
-    loadBalancerType: loadBalancerType
-
   }
 }
 

@@ -5,10 +5,28 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "1373413921039365589"
+      "templateHash": "4527832217554678627"
     }
   },
   "parameters": {
+    "clientName": {
+      "type": "string",
+      "metadata": {
+        "description": "Update to match Client ** use lower case **"
+      }
+    },
+    "vnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Prefix for client vnet eg: 172.16.173 ** check subnet file for next available **"
+      }
+    },
+    "clientIP": {
+      "type": "string",
+      "metadata": {
+        "description": "External client IP"
+      }
+    },
     "adminPassword": {
       "type": "secureString",
       "metadata": {
@@ -22,10 +40,16 @@
       }
     },
     "WireguardConfNum": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Number of conf files required"
+      }
     },
     "WireguardStartingIP": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Starting IP for clients eg: 10"
+      }
     },
     "DC1CustomRDPport": {
       "type": "int",
@@ -50,18 +74,6 @@
       "metadata": {
         "description": "Custom Port for WVD between 50000 and 63000"
       }
-    },
-    "clientName": {
-      "type": "string",
-      "defaultValue": "robortustest"
-    },
-    "vnetPrefix": {
-      "type": "string",
-      "defaultValue": "172.16.173"
-    },
-    "clientIP": {
-      "type": "string",
-      "defaultValue": "78.143.138.203"
     },
     "localGatewayAddressPrefix": {
       "type": "string",
@@ -94,7 +106,7 @@
     },
     "UPNsuffix": {
       "type": "string",
-      "defaultValue": "robortustest.ie"
+      "defaultValue": "[format('{0}.ie', parameters('clientName'))]"
     },
     "location": {
       "type": "string",
@@ -128,10 +140,6 @@
       "type": "string",
       "defaultValue": "Storage"
     },
-    "vnetName": {
-      "type": "string",
-      "defaultValue": "vnet"
-    },
     "vnetaddressPrefix": {
       "type": "string",
       "defaultValue": "[format('{0}.0/24', parameters('vnetPrefix'))]"
@@ -147,46 +155,6 @@
     "wgSubnetPrefix": {
       "type": "string",
       "defaultValue": "[format('{0}.144/29', parameters('vnetPrefix'))]"
-    },
-    "vnetLocation": {
-      "type": "string",
-      "defaultValue": "northeurope"
-    },
-    "subnetName": {
-      "type": "string",
-      "defaultValue": "subnet"
-    },
-    "gatewaySubnetName": {
-      "type": "string",
-      "defaultValue": "gatewaySubnet"
-    },
-    "wgSubnetName": {
-      "type": "string",
-      "defaultValue": "wireguardSubnet"
-    },
-    "nsgNAME": {
-      "type": "string",
-      "defaultValue": "NSG"
-    },
-    "LBname": {
-      "type": "string",
-      "defaultValue": "LB"
-    },
-    "APPLBName": {
-      "type": "string",
-      "defaultValue": "APP-LB"
-    },
-    "publicIPAddressName": {
-      "type": "string",
-      "defaultValue": "LB-PublicIP"
-    },
-    "APPpublicIPAddressName": {
-      "type": "string",
-      "defaultValue": "APP-LB-PublicIP"
-    },
-    "LBFEname": {
-      "type": "string",
-      "defaultValue": "LB-frontEnd"
     },
     "hostpoolName": {
       "type": "string",
@@ -305,41 +273,14 @@
           "wgSubnetPrefix": {
             "value": "[parameters('wgSubnetPrefix')]"
           },
-          "wgSubnetName": {
-            "value": "[parameters('wgSubnetName')]"
-          },
           "localGatewayAddressPrefix": {
             "value": "[parameters('localGatewayAddressPrefix')]"
           },
           "sharedKey": {
             "value": "[parameters('sharedKey')]"
           },
-          "vnetName": {
-            "value": "[parameters('vnetName')]"
-          },
-          "subnetName": {
-            "value": "[parameters('subnetName')]"
-          },
-          "gatewaySubnetName": {
-            "value": "[parameters('gatewaySubnetName')]"
-          },
-          "nsgName": {
-            "value": "[parameters('nsgNAME')]"
-          },
           "clientIP": {
             "value": "[parameters('clientIP')]"
-          },
-          "publicIPAddressName": {
-            "value": "[parameters('publicIPAddressName')]"
-          },
-          "APPpublicIPAddressName": {
-            "value": "[parameters('APPpublicIPAddressName')]"
-          },
-          "LBname": {
-            "value": "[parameters('LBname')]"
-          },
-          "APPLBname": {
-            "value": "[parameters('APPLBName')]"
           },
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
@@ -388,7 +329,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "13636394655844066157"
+              "templateHash": "15280276157949679908"
             }
           },
           "parameters": {
@@ -405,7 +346,8 @@
               "type": "string"
             },
             "vnetName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "vnet"
             },
             "vnetaddressPrefix": {
               "type": "string"
@@ -414,18 +356,24 @@
               "type": "string"
             },
             "subnetName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "subnet"
             },
             "gatewaySubnetPrefix": {
               "type": "string"
             },
             "gatewaySubnetName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "gatewaySubnet"
             },
             "wgSubnetPrefix": {
               "type": "string"
             },
             "wgSubnetName": {
+              "type": "string",
+              "defaultValue": "wireguardSubnet"
+            },
+            "clientIP": {
               "type": "string"
             },
             "localGatewayName": {
@@ -455,23 +403,24 @@
               "type": "string"
             },
             "nsgName": {
-              "type": "string"
-            },
-            "clientIP": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "NSG"
             },
             "publicIPAddressName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "LB-PublicIP"
             },
             "APPpublicIPAddressName": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "APP-LB-PublicIP"
             },
             "WVDpublicIPAddressName": {
               "type": "string",
               "defaultValue": "WVD-PIP"
             },
             "LBname": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "LB"
             },
             "DC1CustomRDPport": {
               "type": "int"
@@ -480,7 +429,8 @@
               "type": "int"
             },
             "APPLBname": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "APP-LB"
             },
             "APPCustomRDPport": {
               "type": "int"
@@ -662,8 +612,10 @@
               }
             },
             "backupFabric": "Azure",
-            "protectionContainer": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
-            "protectedItem": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
+            "protectionContainerDC1": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
+            "protectedItemDC1": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
+            "protectionContainerAPP": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('APPname'))]",
+            "protectedItemAPP": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('APPname'))]",
             "testPolicy": "DefaultPoliy",
             "BackupPolicyName": "[format('{0}/{1}', parameters('vaultName_var'), parameters('policyName'))]",
             "wireguardPrefix": "10.200.200.0/24"
@@ -832,9 +784,35 @@
                     }
                   },
                   {
-                    "name": "ClientDNSrule",
+                    "name": "OrtusPreston-allow-rdp",
                     "properties": {
                       "priority": 103,
+                      "sourceAddressPrefix": "86.47.40.84",
+                      "protocol": "*",
+                      "destinationPortRange": "3389",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*"
+                    }
+                  },
+                  {
+                    "name": "OrtusMonor-allow-rdp",
+                    "properties": {
+                      "priority": 104,
+                      "sourceAddressPrefix": "83.70.173.185",
+                      "protocol": "*",
+                      "destinationPortRange": "3389",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*"
+                    }
+                  },
+                  {
+                    "name": "ClientDNSrule",
+                    "properties": {
+                      "priority": 105,
                       "sourceAddressPrefix": "[parameters('clientIP')]",
                       "protocol": "*",
                       "destinationPortRange": "53",
@@ -1608,7 +1586,7 @@
             {
               "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
               "apiVersion": "2020-02-02",
-              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainer'), variables('protectedItem'))]",
+              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainerDC1'), variables('protectedItemDC1'))]",
               "properties": {
                 "protectedItemType": "Microsoft.Compute/virtualMachines",
                 "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]",
@@ -1616,6 +1594,22 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[1])]",
+                "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]",
+                "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+              "apiVersion": "2020-02-02",
+              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainerAPP'), variables('protectedItemAPP'))]",
+              "properties": {
+                "protectedItemType": "Microsoft.Compute/virtualMachines",
+                "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]",
+                "sourceResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]",
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[1])]",
                 "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]",
                 "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]"
