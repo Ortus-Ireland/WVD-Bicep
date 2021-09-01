@@ -300,10 +300,10 @@ resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 
 //////////////////////////////////////////////////
 ///
-///  Public IP for WVD Load Balancer
+///  Public IP for WVD Load Balancer - NOT USED
 ///
 /////////////////////////////////////////////////
-
+/*
 param WVDpublicIPAddressName string = 'WVD-PIP'
 
 resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
@@ -318,7 +318,7 @@ resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
     name: 'Basic'
   }
 }
-
+*/
 
 
 //////////////////////////////////////////////////
@@ -806,6 +806,7 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   ///  App Server Deploy
   ///
   /////////////////////////////////////////////////
+
 
   resource APPvm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
     name: APPname

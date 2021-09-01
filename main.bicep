@@ -31,8 +31,6 @@ param DC1CustomRDPport int
 param DC2CustomRDPport int
 @description('Custom Port for APP between 50000 and 63000')
 param APPCustomRDPport int
-@description('Custom Port for WVD between 50000 and 63000')
-param WVDCustomRDPport int
 
 @description('Local Network CIDR block eg: 192.168.10.0/24')
 param localGatewayAddressPrefix string = '192.168.80.0/24'

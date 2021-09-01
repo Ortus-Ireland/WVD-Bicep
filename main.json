@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "4527832217554678627"
+      "templateHash": "15169687142812404579"
     }
   },
   "parameters": {
@@ -67,12 +67,6 @@
       "type": "int",
       "metadata": {
         "description": "Custom Port for APP between 50000 and 63000"
-      }
-    },
-    "WVDCustomRDPport": {
-      "type": "int",
-      "metadata": {
-        "description": "Custom Port for WVD between 50000 and 63000"
       }
     },
     "localGatewayAddressPrefix": {
@@ -179,26 +173,6 @@
     "workspaceNameFriendlyName": {
       "type": "string",
       "defaultValue": "[format('{0} Cloud Desktop Workspace', parameters('clientName'))]"
-    },
-    "preferredAppGroupType": {
-      "type": "string",
-      "defaultValue": "Desktop"
-    },
-    "wvdbackplanelocation": {
-      "type": "string",
-      "defaultValue": "northeurope"
-    },
-    "hostPoolType": {
-      "type": "string",
-      "defaultValue": "pooled"
-    },
-    "loadBalancerType": {
-      "type": "string",
-      "defaultValue": "BreadthFirst"
-    },
-    "logAnalyticsWorkspaceName": {
-      "type": "string",
-      "defaultValue": "LAWorkspace"
     },
     "storageaccountlocation": {
       "type": "string",
@@ -329,7 +303,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "15280276157949679908"
+              "templateHash": "12618005737975007180"
             }
           },
           "parameters": {
@@ -413,10 +387,6 @@
             "APPpublicIPAddressName": {
               "type": "string",
               "defaultValue": "APP-LB-PublicIP"
-            },
-            "WVDpublicIPAddressName": {
-              "type": "string",
-              "defaultValue": "WVD-PIP"
             },
             "LBname": {
               "type": "string",
@@ -843,20 +813,6 @@
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2020-06-01",
               "name": "[parameters('APPpublicIPAddressName')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "publicIPAllocationMethod": "Static",
-                "publicIPAddressVersion": "IPv4",
-                "idleTimeoutInMinutes": 4
-              },
-              "sku": {
-                "name": "Basic"
-              }
-            },
-            {
-              "type": "Microsoft.Network/publicIPAddresses",
-              "apiVersion": "2020-06-01",
-              "name": "[parameters('WVDpublicIPAddressName')]",
               "location": "[parameters('location')]",
               "properties": {
                 "publicIPAllocationMethod": "Static",
@@ -1753,18 +1709,6 @@
           },
           "workspaceNameFriendlyName": {
             "value": "[parameters('workspaceNameFriendlyName')]"
-          },
-          "preferredAppGroupType": {
-            "value": "[parameters('preferredAppGroupType')]"
-          },
-          "wvdbackplanelocation": {
-            "value": "[parameters('wvdbackplanelocation')]"
-          },
-          "hostPoolType": {
-            "value": "[parameters('hostPoolType')]"
-          },
-          "loadBalancerType": {
-            "value": "[parameters('loadBalancerType')]"
           }
         },
         "template": {
