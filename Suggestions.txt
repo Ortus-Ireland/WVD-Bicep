@@ -1,0 +1,2 @@
+-Remove "-test" from VM names
+-Update pre-Windows2000 domain name to a variable from "rt"
