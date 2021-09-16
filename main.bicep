@@ -33,13 +33,13 @@ param DC2CustomRDPport int
 param APPCustomRDPport int
 
 @description('Local Network CIDR block eg: 192.168.10.0/24')
-param localGatewayAddressPrefix string = '192.168.80.0/24'
+param localGatewayAddressPrefix string 
 
 @description('Gateway VPN Shared Key')
 param sharedKey string
 
 param domainName string = 'ad.${clientName}.ie'
-param netBiosName string = 'rt'
+param netBiosName string
 param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
 param officelocation string = 'Dublin'
 param UPNsuffix string = '${clientName}.ie'

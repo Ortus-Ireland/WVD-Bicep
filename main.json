@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "15169687142812404579"
+      "templateHash": "14632073217008466058"
     }
   },
   "parameters": {
@@ -71,7 +71,6 @@
     },
     "localGatewayAddressPrefix": {
       "type": "string",
-      "defaultValue": "192.168.80.0/24",
       "metadata": {
         "description": "Local Network CIDR block eg: 192.168.10.0/24"
       }
@@ -87,8 +86,7 @@
       "defaultValue": "[format('ad.{0}.ie', parameters('clientName'))]"
     },
     "netBiosName": {
-      "type": "string",
-      "defaultValue": "rt"
+      "type": "string"
     },
     "OUpath": {
       "type": "string",
