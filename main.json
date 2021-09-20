@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "14632073217008466058"
+      "templateHash": "10050772031894852793"
     }
   },
   "parameters": {
@@ -301,7 +301,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "12618005737975007180"
+              "templateHash": "16816502392541339344"
             }
           },
           "parameters": {
@@ -412,15 +412,15 @@
             },
             "DC1name": {
               "type": "string",
-              "defaultValue": "DC1-test"
+              "defaultValue": "DC1"
             },
             "DC2name": {
               "type": "string",
-              "defaultValue": "DC2-test"
+              "defaultValue": "DC2"
             },
             "APPname": {
               "type": "string",
-              "defaultValue": "APP-test"
+              "defaultValue": "APP"
             },
             "vmSize": {
               "type": "string",
