@@ -477,9 +477,9 @@ param localAdminUser string = 'localadmin'
 @secure()
 param adminPassword string
 
-param DC1name string = 'DC1-test'
-param DC2name string = 'DC2-test'
-param APPname string = 'APP-test'
+param DC1name string = 'DC1'
+param DC2name string = 'DC2'
+param APPname string = 'APP'
 
 param vmSize string = 'Standard_B1ms' 
 param vnetPrefix string

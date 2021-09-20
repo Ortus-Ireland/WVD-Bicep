@@ -91,6 +91,9 @@ Register-ScheduledTask -TaskName ShadowCopyC_PM -Trigger $Trigger -Action $Actio
 #Install .NET 3.5
 Install-WindowsFeature Net-Framework-Core
 
+#install Print Server role
+Install-WindowsFeature Print-Services
+
 #Install Data Deduplication
 Install-WindowsFeature -Name FS-Data-Deduplication
 
