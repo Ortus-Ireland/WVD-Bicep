@@ -1,3 +1,7 @@
 -Remove "-test" from VM names - done
 -Update pre-Windows2000 domain name to a variable from "rt" - done
 -Print Server role APP server - done
+
+
+storage account name limit
+deploy LB and NSG for AVD session host
