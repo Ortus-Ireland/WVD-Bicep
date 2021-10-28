@@ -6,13 +6,6 @@ targetScope = 'subscription'
 ///
 /////////////////////////////////////////////////
 
-@description('Type of Deployment needed')
-@allowed([
-  'Cloud Desktop' 
-  'Cloud Workplace'
-  'Remote App'
-])
-param DeploymentType string
 
 @description('Update to match Client ** use lower case NO SPACES **')
 param clientName string 
@@ -39,11 +32,6 @@ param DC1CustomRDPport int
 param DC2CustomRDPport int
 @description('Custom Port for APP between 50000 and 63000')
 param APPCustomRDPport int
-@description('Custom Port for AVD Host between 50000 and 63000')
-param AVDCustomRDPport int
-
-@description('Expiration time for the HostPool registration token. This must be up to 30 days from todays date.')
-param tokenExpirationTime string
 
 @description('Local Network CIDR block eg: 192.168.10.0/24')
 param localGatewayAddressPrefix string 
@@ -79,30 +67,7 @@ param subnetPrefix string = '${vnetPrefix}.0/25'
 param gatewaySubnetPrefix string = '${vnetPrefix}.128/29'
 param wgSubnetPrefix string = '${vnetPrefix}.144/29'
 
-//////////////////////////////////////////////////
-///
-///  WVD Parameters
-///
-/////////////////////////////////////////////////
 
-param hostpoolName string = '${clientName}Hostpool'
-param hostpoolFriendlyName string = '${clientName} Cloud Desktop Hostpool'
-param appgroupName string = '${clientName}WVDAppGroup'
-param appgroupNameFriendlyName string = '${clientName} Cloud Desktop Appgroup'
-param workspaceName string = '${clientName}WVDWorkspace'
-param workspaceNameFriendlyName string = '${clientName} Cloud Desktop Workspace'
-
-//////////////////////////////////////////////////
-///
-///  Define Azure Files deployment parameters
-///
-/////////////////////////////////////////////////
-
-param storageaccountlocation string = 'northeurope'
-param storageaccountName string = '${clientName}sa'
-param storageaccountkind string = 'FileStorage'
-param storgeaccountglobalRedundancy string = 'Premium_LRS'
-param fileshareFolderName string = 'fslogix-profilecontainers'
 
 //////////////////////////////////////////////////
 ///
@@ -110,10 +75,6 @@ param fileshareFolderName string = 'fslogix-profilecontainers'
 ///
 /////////////////////////////////////////////////
 
-resource rgwvd 'Microsoft.Resources/resourceGroups@2020-06-01' = {
-  name : WVDresourceGroupName
-  location : location
-}
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name : resourceGroupName
   location : location
@@ -154,26 +115,8 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     DC1CustomRDPport: DC1CustomRDPport
     DC2CustomRDPport: DC2CustomRDPport
     APPCustomRDPport: APPCustomRDPport
-    WVDCustomRDPport: AVDCustomRDPport
-    
+        
   }
 }
 
-
-module DeployWVD 'Deploy-WVD-VMs.bicep' = if (DeploymentType == 'Cloud Desktop'){
-  name: 'DeployWVD'
-  scope: resourceGroup(rgwvd.name)
-  params:{
-    hostpoolName:hostpoolName
-    hostpoolFriendlyName: hostpoolFriendlyName
-    appgroupName: appgroupName 
-    appgroupNameFriendlyName: appgroupNameFriendlyName
-    workspaceName: workspaceName
-    workspaceNameFriendlyName: workspaceNameFriendlyName
-    tokenExpirationTime: tokenExpirationTime
-  }
-  dependsOn: [
-    DeployVMs
-  ]
-}
 

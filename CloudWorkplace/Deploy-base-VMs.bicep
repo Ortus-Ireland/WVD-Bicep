@@ -4,8 +4,6 @@
 ///
 /////////////////////////////////////////////////
 
-
-param testValue string
 param storageAccountName string
 param location string
 param storageSKU string
@@ -300,27 +298,6 @@ resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 
 //////////////////////////////////////////////////
 ///
-///  Public IP for WVD Load Balancer - NOT USED
-///
-/////////////////////////////////////////////////
-
-param WVDpublicIPAddressName string = 'AVD-PIP'
-
-resource wvdpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: WVDpublicIPAddressName
-  location: location
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    publicIPAddressVersion: 'IPv4'
-    idleTimeoutInMinutes: 4
-  }
-  sku: {
-    name: 'Basic'
-  }
-}
-
-//////////////////////////////////////////////////
-///
 /// DC's Load Balancer
 ///
 /////////////////////////////////////////////////
@@ -466,67 +443,6 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
 
 //////////////////////////////////////////////////
 ///
-/// AVD Load Balancer
-///
-/////////////////////////////////////////////////
-
-param AVDLBname string = 'AVD-LB'
-param WVDCustomRDPport int
-  
-resource AVDLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
-  name: AVDLBname
-  location: location
-  sku:{
-    name: 'Basic'
-  }
-  properties: {
-    frontendIPConfigurations: [
-      {
-        name: 'AVDLBFE'
-        properties: {
-          publicIPAddress: {
-            id: wvdpip.id
-          }
-        }
-      }
-    ]
-    backendAddressPools: [
-      {
-        name: 'AVDLBBAP'
-      }
-    ]
-    inboundNatRules: [
-      {
-        name: 'AVD-RDP-TCP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', AVDLBname, 'AVDLBFE')
-          }
-          protocol: 'Tcp'
-          frontendPort: WVDCustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-      {
-        name: 'AVD-RDP-UDP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', AVDLBname, 'AVDLBFE')
-          }
-          protocol: 'Udp'
-          frontendPort: WVDCustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-    ]
-  }
-}
-
-
-//////////////////////////////////////////////////
-///
 ///  VM Variables
 ///
 /////////////////////////////////////////////////
@@ -539,7 +455,6 @@ param adminPassword string
 param DC1name string = 'DC1'
 param DC2name string = 'DC2'
 param APPname string = 'APP'
-param AVDname string = 'AVD-0'
 
 param vmSize string = 'Standard_B1ms' 
 param vnetPrefix string
@@ -547,20 +462,15 @@ param vnetPrefix string
 param DC1networkInterfaceName string = 'DC1interface'
 param DC2networkInterfaceName string = 'DC2interface'
 param APPnetworkInterfaceName string = 'APPinterface'
-param AVDnetworkInterfaceName string = 'AVDinterface'
 
 
 param DC1diagStorageAccountName string = concat('dc1diags', uniqueString(resourceGroup().id))
 param DC2diagStorageAccountName string = concat('dc2diags', uniqueString(resourceGroup().id))
 param APPdiagStorageAccountName string = concat('appdiags', uniqueString(resourceGroup().id))
-param AVDdiagStorageAccountName string = concat('avddiags', uniqueString(resourceGroup().id))
-
 
 param DC1privateIP string = '${vnetPrefix}.10'
 param DC2privateIP string = '${vnetPrefix}.11'
 param APPprivateIP string = '${vnetPrefix}.12'
-param AVDprivateIP string = '${vnetPrefix}.13'
-
 
 
 var subnetRef = '${vnet.id}/subnets/${subnetName}'
@@ -699,40 +609,7 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
     }
   }
 
-  resource AVDnic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
-    name: AVDnetworkInterfaceName
-    location: location
-    dependsOn:[
-      AVDLoadbalancer
-    ]
-    properties: {
-      ipConfigurations: [
-        {
-          name: 'ipconfig1'
-          properties: {
-            subnet: {
-              id: subnetRef
-            }
-            privateIPAllocationMethod: 'Static'
-            privateIPAddress: AVDprivateIP
-            loadBalancerBackendAddressPools:[
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', AVDLBname, 'AVDLBBAP')
-              }
-            ]
-            loadBalancerInboundNatRules: [
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', AVDLBname, 'AVD-RDP-TCP')
-              }
-            ]
-          }
-        }
-      ]
-      networkSecurityGroup: {
-        id: nsg.id
-      }
-    }
-  }
+
 
   //////////////////////////////////////////////////
   ///
@@ -981,74 +858,6 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   }
 
 
-  //////////////////////////////////////////////////
-  ///
-  ///  AVD Server Deploy
-  ///
-  /////////////////////////////////////////////////
-
-
-  resource AVDvm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
-    name: AVDname
-    location: location
-    dependsOn:[
-      AVDnic
-    ]
-    properties: {
-      osProfile: {
-        computerName: AVDname
-        adminUsername: localAdminUser
-        adminPassword: adminPassword
-        windowsConfiguration: {
-          provisionVMAgent: true
-        }
-      }
-      hardwareProfile: {
-        vmSize: vmSize
-      }
-      storageProfile: {
-        imageReference: {
-          publisher: 'MicrosoftWindowsDesktop'
-          offer: 'Windows-11'
-          sku: 'win11-21h2-avd'
-          version: 'latest'
-        }
-        osDisk: {
-          name: 'AVD-osdisk'
-          createOption: 'FromImage'
-          diskSizeGB: 128
-          managedDisk: {
-            storageAccountType: 'Standard_LRS'
-          }
-        }
-      }
-      networkProfile: {
-        networkInterfaces: [
-          {
-            properties: {
-              primary: true
-            }
-            id: AVDnic.id
-          }
-        ]
-      }
-      diagnosticsProfile: {
-        bootDiagnostics: {
-          enabled: true
-          storageUri: AVDdiagsAccount.properties.primaryEndpoints.blob
-        }
-      }
-    }
-  }
-  
-  resource AVDdiagsAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
-    name: AVDdiagStorageAccountName
-    location: location
-    sku: {
-      name: 'Standard_LRS'
-    }
-    kind: 'Storage'
-  } 
 //////////////////////////////////////////////////
 ///
 ///  Wireguard Deploy - *** TIDY UP CODE ***
@@ -1068,7 +877,6 @@ param dnsLabelPrefix string = toLower('wireguard-123123123d-${uniqueString(resou
 param ubuntuOSVersion string = '20_04-lts'
 param WGvmSize string = 'Standard_F2s' 
 param networkSecurityGroupName string = 'WG-NSG'
-var acceleratedNetworking = 'True'
 var WGpublicIPAddressName = '${WGvmName}PublicIP'
 var networkInterfaceName = '${WGvmName}NetInt'
 var osDiskType = 'Standard_LRS'
@@ -1184,11 +992,6 @@ resource WGvm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
     }
   }
 }
-
-
-//output administratorUsername string = adminUsername
-//output hostname string = publicIP.properties.dnsSettings.fqdn
-//output sshCommand string = 'ssh${adminUsername}@${publicIP.properties.dnsSettings.fqdn}'
 
 
 //////////////////////////////////////////////////
