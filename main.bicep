@@ -6,7 +6,15 @@ targetScope = 'subscription'
 ///
 /////////////////////////////////////////////////
 
-@description('Update to match Client ** use lower case **')
+@description('Type of Deployment needed')
+@allowed([
+  'Cloud Desktop' 
+  'Cloud Workplace'
+  'Remote App'
+])
+param DeploymentType string
+
+@description('Update to match Client ** use lower case NO SPACES **')
 param clientName string 
 @description('Prefix for client vnet eg: 172.16.173 ** check subnet file for next available **')
 param vnetPrefix string
@@ -31,6 +39,11 @@ param DC1CustomRDPport int
 param DC2CustomRDPport int
 @description('Custom Port for APP between 50000 and 63000')
 param APPCustomRDPport int
+@description('Custom Port for AVD Host between 50000 and 63000')
+param AVDCustomRDPport int
+
+@description('Expiration time for the HostPool registration token. This must be up to 30 days from todays date.')
+param tokenExpirationTime string
 
 @description('Local Network CIDR block eg: 192.168.10.0/24')
 param localGatewayAddressPrefix string 
@@ -38,8 +51,8 @@ param localGatewayAddressPrefix string
 @description('Gateway VPN Shared Key')
 param sharedKey string
 
-param domainName string = 'ad.${clientName}.ie'
 param netBiosName string
+param domainName string = 'ad.${clientName}.ie'
 param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
 param officelocation string = 'Dublin'
 param UPNsuffix string = '${clientName}.ie'
@@ -141,13 +154,13 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     DC1CustomRDPport: DC1CustomRDPport
     DC2CustomRDPport: DC2CustomRDPport
     APPCustomRDPport: APPCustomRDPport
-    //WVDCustomRDPport: WVDCustomRDPport
+    WVDCustomRDPport: AVDCustomRDPport
     
   }
 }
 
 
-module DeployWVD 'Deploy-WVD-VMs.bicep' = {
+module DeployWVD 'Deploy-WVD-VMs.bicep' = if (DeploymentType == 'Cloud Desktop'){
   name: 'DeployWVD'
   scope: resourceGroup(rgwvd.name)
   params:{
@@ -157,6 +170,10 @@ module DeployWVD 'Deploy-WVD-VMs.bicep' = {
     appgroupNameFriendlyName: appgroupNameFriendlyName
     workspaceName: workspaceName
     workspaceNameFriendlyName: workspaceNameFriendlyName
+    tokenExpirationTime: tokenExpirationTime
   }
+  dependsOn: [
+    DeployVMs
+  ]
 }
 

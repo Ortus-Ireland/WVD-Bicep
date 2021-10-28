@@ -15,7 +15,8 @@ param preferredAppGroupType string = 'Desktop'
 param wvdbackplanelocation string = 'northeurope'
 param hostPoolType string = 'pooled'
 param loadBalancerType string = 'BreadthFirst'
-
+param maxSessionLimit int = 99999
+param tokenExpirationTime string
 //////////////////////////////////////////////////
 ///
 ///  WVD Hostpool Creation
@@ -30,9 +31,17 @@ resource hp 'Microsoft.DesktopVirtualization/hostpools@2019-12-10-preview' = {
     hostPoolType : hostPoolType
     loadBalancerType : loadBalancerType
     preferredAppGroupType: preferredAppGroupType
-    
+    maxSessionLimit: maxSessionLimit
+    validationEnvironment: false
+    registrationInfo: {
+      expirationTime: tokenExpirationTime
+      token: null
+      registrationTokenOperation: 'Update'
+    }
   }
 }
+
+
 
 //////////////////////////////////////////////////
 ///

@@ -69,6 +69,7 @@ mkdir F:\Windows\NTDS
 mkdir F:\Windows\SYSVOL
 Import-Module ADDSDeployment
 Install-ADDSDomainController -InstallDNS:$true -Credential $Credentials -DomainName $domainname -DatabasePath "F:\Windows\NTDS" -LogPath "F:\Windows\NTDS" -SYSVOLPath "F:\Windows\SYSVOL" -Force:$true -safemodeadministratorpassword (convertto-securestring $adminPassword -asplaintext -force)
+Start-Sleep -s 15
 shutdown -r -t 30
 
 #Reboot Required

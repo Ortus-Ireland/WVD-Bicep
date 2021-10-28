@@ -1,3 +1,33 @@
 -Remove "-test" from VM names - done
 -Update pre-Windows2000 domain name to a variable from "rt" - done
 -Print Server role APP server - done
+
+
+
+
+
+resource DC2joindomain 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' {
+  name: '${DC2name}/joindomain'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'JsonADDomainExtension'
+    typeHandlerVersion: '1.3'
+    autoUpgradeMinorVersion: true
+    settings: {
+      name: domainName
+      ouPath: OUpath
+      user: localAdminUser
+      restart: 'true'
+      options: '3'
+      NumberOfRetries: '4'
+      RetryIntervalInMilliseconds: '30000'
+    }
+    protectedSettings: {
+      password: adminPassword
+    }
+  }
+  dependsOn: [
+    DC1vmName_WinRMCustomScriptExtension
+  ]
+}]

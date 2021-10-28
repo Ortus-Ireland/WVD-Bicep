@@ -5,14 +5,25 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "10050772031894852793"
+      "templateHash": "18022512199004997635"
     }
   },
   "parameters": {
+    "DeploymentType": {
+      "type": "string",
+      "allowedValues": [
+        "Cloud Desktop",
+        "Cloud Workplace",
+        "Remote App"
+      ],
+      "metadata": {
+        "description": "Type of Deployment needed"
+      }
+    },
     "clientName": {
       "type": "string",
       "metadata": {
-        "description": "Update to match Client ** use lower case **"
+        "description": "Update to match Client ** use lower case NO SPACES **"
       }
     },
     "vnetPrefix": {
@@ -69,6 +80,18 @@
         "description": "Custom Port for APP between 50000 and 63000"
       }
     },
+    "AVDCustomRDPport": {
+      "type": "int",
+      "metadata": {
+        "description": "Custom Port for AVD Host between 50000 and 63000"
+      }
+    },
+    "tokenExpirationTime": {
+      "type": "string",
+      "metadata": {
+        "description": "Expiration time for the HostPool registration token. This must be up to 30 days from todays date."
+      }
+    },
     "localGatewayAddressPrefix": {
       "type": "string",
       "metadata": {
@@ -81,12 +104,12 @@
         "description": "Gateway VPN Shared Key"
       }
     },
+    "netBiosName": {
+      "type": "string"
+    },
     "domainName": {
       "type": "string",
       "defaultValue": "[format('ad.{0}.ie', parameters('clientName'))]"
-    },
-    "netBiosName": {
-      "type": "string"
     },
     "OUpath": {
       "type": "string",
@@ -292,6 +315,9 @@
           },
           "APPCustomRDPport": {
             "value": "[parameters('APPCustomRDPport')]"
+          },
+          "WVDCustomRDPport": {
+            "value": "[parameters('AVDCustomRDPport')]"
           }
         },
         "template": {
@@ -301,7 +327,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "16816502392541339344"
+              "templateHash": "17420702256415986321"
             }
           },
           "parameters": {
@@ -386,6 +412,10 @@
               "type": "string",
               "defaultValue": "APP-LB-PublicIP"
             },
+            "WVDpublicIPAddressName": {
+              "type": "string",
+              "defaultValue": "AVD-PIP"
+            },
             "LBname": {
               "type": "string",
               "defaultValue": "LB"
@@ -401,6 +431,13 @@
               "defaultValue": "APP-LB"
             },
             "APPCustomRDPport": {
+              "type": "int"
+            },
+            "AVDLBname": {
+              "type": "string",
+              "defaultValue": "AVD-LB"
+            },
+            "WVDCustomRDPport": {
               "type": "int"
             },
             "localAdminUser": {
@@ -422,6 +459,10 @@
               "type": "string",
               "defaultValue": "APP"
             },
+            "AVDname": {
+              "type": "string",
+              "defaultValue": "AVD-0"
+            },
             "vmSize": {
               "type": "string",
               "defaultValue": "Standard_B1ms"
@@ -441,6 +482,10 @@
               "type": "string",
               "defaultValue": "APPinterface"
             },
+            "AVDnetworkInterfaceName": {
+              "type": "string",
+              "defaultValue": "AVDinterface"
+            },
             "DC1diagStorageAccountName": {
               "type": "string",
               "defaultValue": "[concat('dc1diags', uniqueString(resourceGroup().id))]"
@@ -453,6 +498,10 @@
               "type": "string",
               "defaultValue": "[concat('appdiags', uniqueString(resourceGroup().id))]"
             },
+            "AVDdiagStorageAccountName": {
+              "type": "string",
+              "defaultValue": "[concat('avddiags', uniqueString(resourceGroup().id))]"
+            },
             "DC1privateIP": {
               "type": "string",
               "defaultValue": "[format('{0}.10', parameters('vnetPrefix'))]"
@@ -464,6 +513,10 @@
             "APPprivateIP": {
               "type": "string",
               "defaultValue": "[format('{0}.12', parameters('vnetPrefix'))]"
+            },
+            "AVDprivateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.13', parameters('vnetPrefix'))]"
             },
             "WGvmName": {
               "type": "string",
@@ -635,9 +688,7 @@
                 ],
                 "dhcpOptions": {
                   "dnsServers": [
-                    "[parameters('DC1privateIP')]",
-                    "[parameters('DC2privateIP')]",
-                    "8.8.8.8"
+                    "[parameters('DC1privateIP')]"
                   ]
                 }
               },
@@ -822,6 +873,20 @@
               }
             },
             {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('WVDpublicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
               "type": "Microsoft.Network/loadBalancers",
               "apiVersion": "2018-10-01",
               "name": "[parameters('LBname')]",
@@ -956,6 +1021,61 @@
               ]
             },
             {
+              "type": "Microsoft.Network/loadBalancers",
+              "apiVersion": "2018-10-01",
+              "name": "[parameters('AVDLBname')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "frontendIPConfigurations": [
+                  {
+                    "name": "AVDLBFE",
+                    "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('WVDpublicIPAddressName'))]"
+                      }
+                    }
+                  }
+                ],
+                "backendAddressPools": [
+                  {
+                    "name": "AVDLBBAP"
+                  }
+                ],
+                "inboundNatRules": [
+                  {
+                    "name": "AVD-RDP-TCP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('AVDLBname'), 'AVDLBFE')]"
+                      },
+                      "protocol": "Tcp",
+                      "frontendPort": "[parameters('WVDCustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  },
+                  {
+                    "name": "AVD-RDP-UDP",
+                    "properties": {
+                      "frontendIPConfiguration": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('AVDLBname'), 'AVDLBFE')]"
+                      },
+                      "protocol": "Udp",
+                      "frontendPort": "[parameters('WVDCustomRDPport')]",
+                      "backendPort": 3389,
+                      "enableFloatingIP": false
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('WVDpublicIPAddressName'))]"
+              ]
+            },
+            {
               "type": "Microsoft.Compute/availabilitySets",
               "apiVersion": "2020-12-01",
               "name": "[variables('availabilitySetNameVar')]",
@@ -1078,6 +1198,44 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/loadBalancers', parameters('APPLBname'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
+                "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('AVDnetworkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('AVDprivateIP')]",
+                      "loadBalancerBackendAddressPools": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('AVDLBname'), 'AVDLBBAP')]"
+                        }
+                      ],
+                      "loadBalancerInboundNatRules": [
+                        {
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('AVDLBname'), 'AVD-RDP-TCP')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('AVDLBname'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
                 "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
               ]
@@ -1310,6 +1468,71 @@
               "type": "Microsoft.Storage/storageAccounts",
               "apiVersion": "2019-06-01",
               "name": "[parameters('APPdiagStorageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage"
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('AVDname')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "osProfile": {
+                  "computerName": "[parameters('AVDname')]",
+                  "adminUsername": "[parameters('localAdminUser')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true
+                  }
+                },
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "imageReference": {
+                    "publisher": "MicrosoftWindowsDesktop",
+                    "offer": "Windows-11",
+                    "sku": "win11-21h2-avd",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "AVD-osdisk",
+                    "createOption": "FromImage",
+                    "diskSizeGB": 128,
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    }
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "properties": {
+                        "primary": true
+                      },
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('AVDnetworkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('AVDdiagStorageAccountName'))).primaryEndpoints.blob]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('AVDdiagStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('AVDnetworkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('AVDdiagStorageAccountName')]",
               "location": "[parameters('location')]",
               "sku": {
                 "name": "Standard_LRS"
@@ -1680,6 +1903,7 @@
       ]
     },
     {
+      "condition": "[equals(parameters('DeploymentType'), 'Cloud Desktop')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-10-01",
       "name": "DeployWVD",
@@ -1707,6 +1931,9 @@
           },
           "workspaceNameFriendlyName": {
             "value": "[parameters('workspaceNameFriendlyName')]"
+          },
+          "tokenExpirationTime": {
+            "value": "[parameters('tokenExpirationTime')]"
           }
         },
         "template": {
@@ -1716,7 +1943,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "15833990748085376374"
+              "templateHash": "18237017670219564643"
             }
           },
           "parameters": {
@@ -1757,6 +1984,13 @@
             "loadBalancerType": {
               "type": "string",
               "defaultValue": "BreadthFirst"
+            },
+            "maxSessionLimit": {
+              "type": "int",
+              "defaultValue": 99999
+            },
+            "tokenExpirationTime": {
+              "type": "string"
             }
           },
           "functions": [],
@@ -1770,7 +2004,14 @@
                 "friendlyName": "[parameters('hostpoolFriendlyName')]",
                 "hostPoolType": "[parameters('hostPoolType')]",
                 "loadBalancerType": "[parameters('loadBalancerType')]",
-                "preferredAppGroupType": "[parameters('preferredAppGroupType')]"
+                "preferredAppGroupType": "[parameters('preferredAppGroupType')]",
+                "maxSessionLimit": "[parameters('maxSessionLimit')]",
+                "validationEnvironment": false,
+                "registrationInfo": {
+                  "expirationTime": "[parameters('tokenExpirationTime')]",
+                  "token": null,
+                  "registrationTokenOperation": "Update"
+                }
               }
             },
             {
@@ -1806,6 +2047,7 @@
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('WVDresourceGroupName'))]"
       ]
     }
