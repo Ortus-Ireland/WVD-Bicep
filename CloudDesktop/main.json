@@ -5,21 +5,10 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "18022512199004997635"
+      "templateHash": "13971549710311157126"
     }
   },
   "parameters": {
-    "DeploymentType": {
-      "type": "string",
-      "allowedValues": [
-        "Cloud Desktop",
-        "Cloud Workplace",
-        "Remote App"
-      ],
-      "metadata": {
-        "description": "Type of Deployment needed"
-      }
-    },
     "clientName": {
       "type": "string",
       "metadata": {
@@ -1903,7 +1892,6 @@
       ]
     },
     {
-      "condition": "[equals(parameters('DeploymentType'), 'Cloud Desktop')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2019-10-01",
       "name": "DeployWVD",

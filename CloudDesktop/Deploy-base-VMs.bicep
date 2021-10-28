@@ -4,8 +4,6 @@
 ///
 /////////////////////////////////////////////////
 
-
-param testValue string
 param storageAccountName string
 param location string
 param storageSKU string

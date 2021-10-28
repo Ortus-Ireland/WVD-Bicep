@@ -6,13 +6,6 @@ targetScope = 'subscription'
 ///
 /////////////////////////////////////////////////
 
-@description('Type of Deployment needed')
-@allowed([
-  'Cloud Desktop' 
-  'Cloud Workplace'
-  'Remote App'
-])
-param DeploymentType string
 
 @description('Update to match Client ** use lower case NO SPACES **')
 param clientName string 
@@ -160,7 +153,7 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
 }
 
 
-module DeployWVD 'Deploy-WVD-VMs.bicep' = if (DeploymentType == 'Cloud Desktop'){
+module DeployWVD 'Deploy-WVD-VMs.bicep' = {
   name: 'DeployWVD'
   scope: resourceGroup(rgwvd.name)
   params:{
