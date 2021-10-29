@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "13971549710311157126"
+      "templateHash": "12479276524252506613"
     }
   },
   "parameters": {
@@ -316,7 +316,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "17420702256415986321"
+              "templateHash": "17815945960411515979"
             }
           },
           "parameters": {
@@ -528,17 +528,19 @@
               "defaultValue": "[format('{0}.0/24', parameters('vnetPrefix'))]"
             },
             "WireguardConfNum": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "230"
             },
             "WireguardStartingIP": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "10"
             },
             "WGadminPassword": {
               "type": "string"
             },
             "dnsLabelPrefix": {
               "type": "string",
-              "defaultValue": "[toLower(format('wireguard-123123123d-{0}', uniqueString(resourceGroup().id)))]"
+              "defaultValue": "[toLower(format('wireguard-{0}', uniqueString(resourceGroup().id)))]"
             },
             "ubuntuOSVersion": {
               "type": "string",
@@ -546,7 +548,7 @@
             },
             "WGvmSize": {
               "type": "string",
-              "defaultValue": "Standard_F2s"
+              "defaultValue": "Standard_F1s"
             },
             "networkSecurityGroupName": {
               "type": "string",
@@ -606,7 +608,6 @@
             "subnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('subnetName'))]",
             "wgSubnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('wgSubnetName'))]",
             "availabilitySetNameVar": "AS",
-            "acceleratedNetworking": "True",
             "WGpublicIPAddressName": "[format('{0}PublicIP', parameters('WGvmName'))]",
             "networkInterfaceName": "[format('{0}NetInt', parameters('WGvmName'))]",
             "osDiskType": "Standard_LRS",
@@ -1552,7 +1553,8 @@
                 "networkSecurityGroup": {
                   "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 },
-                "enableAcceleratedNetworking": true
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": true
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]",
@@ -1578,6 +1580,19 @@
                       "sourcePortRange": "*",
                       "destinationAddressPrefix": "*",
                       "destinationPortRange": "22"
+                    }
+                  },
+                  {
+                    "name": "WG",
+                    "properties": {
+                      "priority": 350,
+                      "protocol": "Udp",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "443"
                     }
                   }
                 ]

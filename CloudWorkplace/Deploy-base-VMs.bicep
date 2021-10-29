@@ -870,12 +870,12 @@ param WGadminUsername string = 'ortusadmin'
 param authenticationType string = 'password'
 param wgPrivateIP string = '${vnetPrefix}.148'
 param allowedIPs string = '${vnetPrefix}.0/24'
-param WireguardConfNum string
-param WireguardStartingIP string
+param WireguardConfNum string = '230'
+param WireguardStartingIP string = '10'
 param WGadminPassword string
-param dnsLabelPrefix string = toLower('wireguard-123123123d-${uniqueString(resourceGroup().id)}')
+param dnsLabelPrefix string = toLower('wireguard-${uniqueString(resourceGroup().id)}')
 param ubuntuOSVersion string = '20_04-lts'
-param WGvmSize string = 'Standard_F2s' 
+param WGvmSize string = 'Standard_F1s' 
 param networkSecurityGroupName string = 'WG-NSG'
 var WGpublicIPAddressName = '${WGvmName}PublicIP'
 var networkInterfaceName = '${WGvmName}NetInt'
@@ -914,7 +914,8 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
     networkSecurityGroup: {
       id: WGnsg.id
     }
-   enableAcceleratedNetworking: true
+   enableAcceleratedNetworking: false
+   enableIPForwarding: true
   }
 }
 
@@ -934,6 +935,20 @@ resource WGnsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
           sourcePortRange: '*'
           destinationAddressPrefix: '*'
           destinationPortRange: '22'
+        }
+      }
+      {
+        name: 'WG'
+        properties:{
+          priority: 350
+          protocol: 'Udp'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+
         }
       }
     ]

@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "12186006394168909881"
+      "templateHash": "2442019450691588084"
     }
   },
   "parameters": {
@@ -251,7 +251,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "16782330240566693855"
+              "templateHash": "790161544245208263"
             }
           },
           "parameters": {
@@ -436,17 +436,19 @@
               "defaultValue": "[format('{0}.0/24', parameters('vnetPrefix'))]"
             },
             "WireguardConfNum": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "230"
             },
             "WireguardStartingIP": {
-              "type": "string"
+              "type": "string",
+              "defaultValue": "10"
             },
             "WGadminPassword": {
               "type": "string"
             },
             "dnsLabelPrefix": {
               "type": "string",
-              "defaultValue": "[toLower(format('wireguard-123123123d-{0}', uniqueString(resourceGroup().id)))]"
+              "defaultValue": "[toLower(format('wireguard-{0}', uniqueString(resourceGroup().id)))]"
             },
             "ubuntuOSVersion": {
               "type": "string",
@@ -454,7 +456,7 @@
             },
             "WGvmSize": {
               "type": "string",
-              "defaultValue": "Standard_F2s"
+              "defaultValue": "Standard_F1s"
             },
             "networkSecurityGroupName": {
               "type": "string",
@@ -1287,7 +1289,8 @@
                 "networkSecurityGroup": {
                   "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 },
-                "enableAcceleratedNetworking": true
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": true
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]",
@@ -1313,6 +1316,19 @@
                       "sourcePortRange": "*",
                       "destinationAddressPrefix": "*",
                       "destinationPortRange": "22"
+                    }
+                  },
+                  {
+                    "name": "WG",
+                    "properties": {
+                      "priority": 350,
+                      "protocol": "Udp",
+                      "access": "Allow",
+                      "direction": "Inbound",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "443"
                     }
                   }
                 ]
