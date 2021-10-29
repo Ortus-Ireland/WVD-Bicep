@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "2442019450691588084"
+      "templateHash": "12663541078413970727"
     }
   },
   "parameters": {
@@ -13,6 +13,12 @@
       "type": "string",
       "metadata": {
         "description": "Update to match Client ** use lower case NO SPACES **"
+      }
+    },
+    "netBiosName": {
+      "type": "string",
+      "metadata": {
+        "description": "netbios name for client ie: rt"
       }
     },
     "vnetPrefix": {
@@ -37,18 +43,6 @@
       "type": "secureString",
       "metadata": {
         "description": "Wireguard Admin Password"
-      }
-    },
-    "WireguardConfNum": {
-      "type": "string",
-      "metadata": {
-        "description": "Number of conf files required"
-      }
-    },
-    "WireguardStartingIP": {
-      "type": "string",
-      "metadata": {
-        "description": "Starting IP for clients eg: 10"
       }
     },
     "DC1CustomRDPport": {
@@ -80,9 +74,6 @@
       "metadata": {
         "description": "Gateway VPN Shared Key"
       }
-    },
-    "netBiosName": {
-      "type": "string"
     },
     "domainName": {
       "type": "string",
@@ -207,17 +198,11 @@
           "adminPassword": {
             "value": "[parameters('adminPassword')]"
           },
-          "vnetPrefix": {
-            "value": "[parameters('vnetPrefix')]"
-          },
           "WGadminPassword": {
             "value": "[parameters('WGadminPassword')]"
           },
-          "WireguardConfNum": {
-            "value": "[parameters('WireguardConfNum')]"
-          },
-          "WireguardStartingIP": {
-            "value": "[parameters('WireguardStartingIP')]"
+          "vnetPrefix": {
+            "value": "[parameters('vnetPrefix')]"
           },
           "domainName": {
             "value": "[parameters('domainName')]"

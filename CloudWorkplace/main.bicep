@@ -9,8 +9,13 @@ targetScope = 'subscription'
 
 @description('Update to match Client ** use lower case NO SPACES **')
 param clientName string 
+
+@description('netbios name for client ie: rt')
+param netBiosName string
+
 @description('Prefix for client vnet eg: 172.16.173 ** check subnet file for next available **')
 param vnetPrefix string
+
 @description('External client IP')
 param clientIP string
 
@@ -21,10 +26,6 @@ param adminPassword string
 @secure()
 @description('Wireguard Admin Password')
 param WGadminPassword string
-@description('Number of conf files required')
-param WireguardConfNum string
-@description('Starting IP for clients eg: 10')
-param WireguardStartingIP string
 
 @description('Custom Port for DC1 between 50000 and 63000')
 param DC1CustomRDPport int
@@ -39,7 +40,6 @@ param localGatewayAddressPrefix string
 @description('Gateway VPN Shared Key')
 param sharedKey string
 
-param netBiosName string
 param domainName string = 'ad.${clientName}.ie'
 param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
 param officelocation string = 'Dublin'
@@ -103,10 +103,8 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     sharedKey: sharedKey
     clientIP: clientIP  
     adminPassword: adminPassword
-    vnetPrefix: vnetPrefix
     WGadminPassword: WGadminPassword
-    WireguardConfNum: WireguardConfNum
-    WireguardStartingIP: WireguardStartingIP
+    vnetPrefix: vnetPrefix
     domainName: domainName
     netBiosName: netBiosName
     officelocation: officelocation
