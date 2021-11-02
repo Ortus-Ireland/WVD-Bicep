@@ -69,6 +69,7 @@ resource vnet 'Microsoft.Network/virtualnetworks@2015-05-01-preview' = {
     dhcpOptions:{
       dnsServers:[
         DC1privateIP
+        '8.8.8.8'
       ]
     }
   }
@@ -82,7 +83,7 @@ resource vnet 'Microsoft.Network/virtualnetworks@2015-05-01-preview' = {
 
 param localGatewayName string = '${clientName}-Network'
 param localGatewayAddressPrefix string
-param localGatewayIpAddress string = '${clientIP}'
+param localGatewayIpAddress string = clientIP
 
 
 resource localGatewayName_resource 'Microsoft.Network/localNetworkGateways@2015-05-01-preview' = {
@@ -1022,7 +1023,7 @@ param OUpath string
 param officelocation string
 param UPNsuffix string
 
-resource DC1vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
+resource DC1vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
   name: '${DC1name}/WinRMCustomScriptExtension'
   location: resourceGroup().location
   dependsOn: [
@@ -1042,7 +1043,7 @@ resource DC1vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   
 }
 
-resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
+resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
   name: '${DC2name}/WinRMCustomScriptExtension'
   location: resourceGroup().location
   dependsOn: [
@@ -1063,7 +1064,7 @@ resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   
 }
 
-resource APPvmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
+resource APPvmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
   name: '${APPname}/WinRMCustomScriptExtension'
   location: resourceGroup().location
   dependsOn: [
@@ -1083,11 +1084,12 @@ resource APPvmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   }
 }
 
-resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
+resource wg 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
   name: '${WGvmName}/wireguard'
   location: location
   dependsOn: [
     WGvm
+    DC1vmName_WinRMCustomScriptExtension
   ]
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
@@ -1149,7 +1151,7 @@ resource vaultName_vaultstorageconfig 'Microsoft.RecoveryServices/vaults/backups
   }
 }
 
-resource vaultName_backupFabric_protectionContainer_protectedItem 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2020-02-02' = {
+resource vaultName_backupFabric_protectionContainer_protectedItem 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2021-08-01' = {
   name: '${vaultName_var}/${backupFabric}/${protectionContainerDC1}/${protectedItemDC1}'
   properties: {
     protectedItemType: 'Microsoft.Compute/virtualMachines'
@@ -1162,7 +1164,7 @@ resource vaultName_backupFabric_protectionContainer_protectedItem 'Microsoft.Rec
   ]
 }
 
-resource vaultName_backupFabric_protectionContainer_protectedItemAPP 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2020-02-02' = {
+resource vaultName_backupFabric_protectionContainer_protectedItemAPP 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2021-08-01' = {
   name: '${vaultName_var}/${backupFabric}/${protectionContainerAPP}/${protectedItemAPP}'
   properties: {
     protectedItemType: 'Microsoft.Compute/virtualMachines'
@@ -1183,7 +1185,7 @@ resource vaultName_backupFabric_protectionContainer_protectedItemAPP 'Microsoft.
 
 var BackupPolicyName = '${vaultName.name}/${policyName}'
 
-resource vaultName_policyName 'Microsoft.RecoveryServices/vaults/backupPolicies@2020-12-01' = {
+resource vaultName_policyName 'Microsoft.RecoveryServices/vaults/backupPolicies@2021-08-01' = {
   name: BackupPolicyName
   properties: {
     backupManagementType: 'AzureIaasVM'

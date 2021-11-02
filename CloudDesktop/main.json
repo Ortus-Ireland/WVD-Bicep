@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "2445142214735362296"
+      "templateHash": "986781199412822962"
     }
   },
   "parameters": {
@@ -301,7 +301,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "17815945960411515979"
+              "templateHash": "14588101785195992468"
             }
           },
           "parameters": {
@@ -663,7 +663,8 @@
                 ],
                 "dhcpOptions": {
                   "dnsServers": [
-                    "[parameters('DC1privateIP')]"
+                    "[parameters('DC1privateIP')]",
+                    "8.8.8.8"
                   ]
                 }
               },
@@ -1721,6 +1722,7 @@
                 }
               },
               "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[1])]",
                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))]",
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('WGvmName'))]"
               ]

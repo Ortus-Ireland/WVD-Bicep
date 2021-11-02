@@ -69,6 +69,7 @@ resource vnet 'Microsoft.Network/virtualnetworks@2015-05-01-preview' = {
     dhcpOptions:{
       dnsServers:[
         DC1privateIP
+        '8.8.8.8'
       ]
     }
   }
@@ -82,7 +83,7 @@ resource vnet 'Microsoft.Network/virtualnetworks@2015-05-01-preview' = {
 
 param localGatewayName string = '${clientName}-Network'
 param localGatewayAddressPrefix string
-param localGatewayIpAddress string = '${clientIP}'
+param localGatewayIpAddress string = clientIP
 
 
 resource localGatewayName_resource 'Microsoft.Network/localNetworkGateways@2015-05-01-preview' = {
@@ -1277,6 +1278,7 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
   location: location
   dependsOn: [
     WGvm
+    DC1vmName_WinRMCustomScriptExtension
   ]
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
