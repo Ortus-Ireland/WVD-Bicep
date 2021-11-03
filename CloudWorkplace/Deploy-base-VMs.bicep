@@ -1043,12 +1043,33 @@ resource DC1vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   
 }
 
+resource DC1part2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
+  name: '${DC1name}/WinRMCustomScriptExtension2'
+  location: resourceGroup().location
+  dependsOn: [
+    wg
+  ]
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.4'
+    settings: {
+      fileUris: [
+        'https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1'
+      ]
+      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC1part2.ps1 ${OUpath} ${clientName} ${officelocation} ${UPNsuffix}'
+    }
+  }
+  
+}
+
+
 resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
   name: '${DC2name}/WinRMCustomScriptExtension'
   location: resourceGroup().location
   dependsOn: [
     DC2vm
-    wg
+    DC1part2vmName_WinRMCustomScriptExtension
   ]
   properties: {
     publisher: 'Microsoft.Compute'

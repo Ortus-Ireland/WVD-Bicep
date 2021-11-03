@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "12234302394937846598"
+      "templateHash": "10536444374819046319"
     }
   },
   "parameters": {
@@ -236,7 +236,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "11041259695729074315"
+              "templateHash": "17127495845919965778"
             }
           },
           "parameters": {
@@ -1401,6 +1401,26 @@
             {
               "type": "Microsoft.Compute/virtualMachines/extensions",
               "apiVersion": "2021-07-01",
+              "name": "[format('{0}/WinRMCustomScriptExtension2', parameters('DC1name'))]",
+              "location": "[resourceGroup().location]",
+              "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.4",
+                "settings": {
+                  "fileUris": [
+                    "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1"
+                  ],
+                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC1part2.ps1 {0} {1} {2} {3}', parameters('OUpath'), parameters('clientName'), parameters('officelocation'), parameters('UPNsuffix'))]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/wireguard', parameters('WGvmName')), '/')[0], split(format('{0}/wireguard', parameters('WGvmName')), '/')[1])]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2021-07-01",
               "name": "[format('{0}/WinRMCustomScriptExtension', parameters('DC2name'))]",
               "location": "[resourceGroup().location]",
               "properties": {
@@ -1415,8 +1435,8 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]",
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/wireguard', parameters('WGvmName')), '/')[0], split(format('{0}/wireguard', parameters('WGvmName')), '/')[1])]"
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension2', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension2', parameters('DC1name')), '/')[1])]",
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]"
               ]
             },
             {

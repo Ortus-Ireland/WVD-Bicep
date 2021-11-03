@@ -49,17 +49,17 @@ Set-WMIInstance -Class Win32_PageFileSetting -Arguments @{name="d:\pagefile.sys"
 ##==================================
 # Download Part 2 and create scheduled Task
 #==================================
-$taskName = "ConfigDC1part2"
-$argument = "-executionpolicy bypass " + "-File C:\Ortus\DC1part2.ps1 " + $OUpath + " " + $clientName + " " + $officelocation + " " + $UPNsuffix
+#$taskName = "ConfigDC1part2"
+#$argument = "-executionpolicy bypass " + "-File C:\Ortus\DC1part2.ps1 " + $OUpath + " " + $clientName + " " + $officelocation + " " + $UPNsuffix
 
-wget https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1 -OutFile C:\Ortus\DC1part2.ps1
+#wget https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1 -OutFile C:\Ortus\DC1part2.ps1
 
-$taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argument
-$taskTrigger = New-ScheduledTaskTrigger -AtStartup 
-$taskTrigger.delay = 'PT30S'
-$User = "NT Authority\System"   
+#$taskAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argument
+#$taskTrigger = New-ScheduledTaskTrigger -AtStartup 
+#$taskTrigger.delay = 'PT30S'
+#$User = "NT Authority\System"   
 
-Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User $User 
+#Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -User $User 
     
 #==================================
 # #Install Active Directoy
@@ -68,7 +68,6 @@ Install-WindowsFeature -name AD-Domain-Services -IncludeManagementTools
 mkdir F:\Windows\NTDS
 mkdir F:\Windows\SYSVOL
 Import-Module ADDSDeployment
-Install-addsforest -DomainName $domainname -DomainNetBIOSName $netbiosname -DatabasePath "F:\Windows\NTDS" -LogPath "F:\Windows\NTDS" -SYSVOLPath "F:\Windows\SYSVOL" -DomainMode "WinThreshold" -ForestMode "WinThreshold" -InstallDNS:$true -NoRebootOnCompletion:$false -Force:$true -safemodeadministratorpassword (convertto-securestring $adminPassword -asplaintext -force)
-
+Install-addsforest -DomainName $domainname -DomainNetBIOSName $netbiosname -DatabasePath "F:\Windows\NTDS" -LogPath "F:\Windows\NTDS" -SYSVOLPath "F:\Windows\SYSVOL" -DomainMode "WinThreshold" -ForestMode "WinThreshold" -InstallDNS:$true -NoRebootOnCompletion:$true -Force:$true -safemodeadministratorpassword (convertto-securestring $adminPassword -asplaintext -force)
 
 shutdown -r -t 30
