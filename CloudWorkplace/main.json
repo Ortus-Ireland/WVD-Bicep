@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "10665834369047983781"
+      "templateHash": "12234302394937846598"
     }
   },
   "parameters": {
@@ -236,7 +236,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "12391713992388560416"
+              "templateHash": "11041259695729074315"
             }
           },
           "parameters": {
@@ -1415,8 +1415,8 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[1])]",
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/wireguard', parameters('WGvmName')), '/')[0], split(format('{0}/wireguard', parameters('WGvmName')), '/')[1])]"
               ]
             },
             {
@@ -1437,7 +1437,7 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]",
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC1name')), '/')[1])]"
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension', parameters('DC2name')), '/')[1])]"
               ]
             },
             {

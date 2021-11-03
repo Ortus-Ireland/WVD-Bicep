@@ -1048,7 +1048,7 @@ resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   location: resourceGroup().location
   dependsOn: [
     DC2vm
-    DC1vmName_WinRMCustomScriptExtension
+    wg
   ]
   properties: {
     publisher: 'Microsoft.Compute'
@@ -1069,7 +1069,7 @@ resource APPvmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   location: resourceGroup().location
   dependsOn: [
     APPvm
-    DC1vmName_WinRMCustomScriptExtension
+    DC2vmName_WinRMCustomScriptExtension
   ]
   properties: {
     publisher: 'Microsoft.Compute'
