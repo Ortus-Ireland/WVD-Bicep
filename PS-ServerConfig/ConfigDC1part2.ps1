@@ -29,7 +29,7 @@ Add-DnsServerForwarder -IPAddress 8.8.4.4 -PassThru
 # Enable Active Directory Recycle bin
 import-module activedirectory
 $tmp = "CN=Recycle Bin Feature,CN=Optional Features,CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration," + $OUpath
-Enable-ADOptionalFeature �Identity $tmp �Scope ForestOrConfigurationSet �Target $addomain
+Enable-ADOptionalFeature -Identity $tmp -Scope ForestOrConfigurationSet -Target $addomain
 
 # Add underscrore to company name
 $_clientName = "_" + $clientName
