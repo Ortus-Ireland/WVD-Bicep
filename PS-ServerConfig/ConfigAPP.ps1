@@ -100,6 +100,8 @@ Install-WindowsFeature -Name FS-Data-Deduplication
 #Enable Data Deduplication on F Drive
 Enable-DedupVolume -Volume F: -UsageType Default
 
+Start-Sleep -s 240
+
 #Domain join server
 $comppath = "OU=Servers,OU=Azure,OU=" + $_clientName + "," + $OUpath
 Add-Computer -DomainName $domainname -OUPath $comppath -Credential $Credentials

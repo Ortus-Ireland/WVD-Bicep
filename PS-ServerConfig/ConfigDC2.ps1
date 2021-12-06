@@ -3,7 +3,11 @@ param
 (
     [Parameter(Mandatory = $true)]
     [string] $domainname,
-    [string] $adminPassword
+    [string] $adminPassword,
+    [string] $OUpath,
+    [string] $clientName,
+    [string] $officelocation,
+    [string] $UPNsuffix
 )
 
 $adminUser = $domainname + "\localadmin"
@@ -11,8 +15,8 @@ $adminPassword = ConvertTo-SecureString -String $adminPassword -AsPlainText -For
 $Credentials = New-Object System.Management.Automation.PSCredential ($adminUser, $adminPassword)
 
 # Config regional settings
-Set-Culture en-IE
-Set-WinHomeLocation 68
+Set-Culture en-IE 
+Set-WinHomeLocation 68 
 Set-WinSystemLocale en-IE
 Set-WinUserLanguageList en-IE -Force
 
@@ -61,6 +65,19 @@ $CurrentPageFile = Get-WmiObject -Query "select * from Win32_PageFileSetting whe
 $CurrentPageFile.delete()
 Set-WMIInstance -Class Win32_PageFileSetting -Arguments @{name="d:\pagefile.sys";InitialSize = 3072; MaximumSize = 3072}
 
+#==================================
+# Configure DC1 OU
+#==================================
+$DC1 = "DC1." + $domainname | Out-File -FilePath c:\Ortus\log.txt -Append
+wget https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1 -OutFile C:\Ortus\DC1part2.ps1
+
+Enable-PSRemoting -Force
+Set-item wsman:localhost\client\trustedhosts -value * -Force
+
+Invoke-Command -ComputerName $DC1 -Credential $Credentials -FilePath C:\Ortus\DC1part2.ps1 -ArgumentList $OUpath,$clientName,$officelocation,$UPNsuffix
+
+
+Start-Sleep -s 10
 #=========================================
 # #Install Active Directoy and Promote DC
 #=========================================
@@ -68,8 +85,11 @@ Install-WindowsFeature -name AD-Domain-Services -IncludeManagementTools
 mkdir F:\Windows\NTDS
 mkdir F:\Windows\SYSVOL
 Import-Module ADDSDeployment
+
+Start-Sleep -s 10
+
 Install-ADDSDomainController -InstallDNS:$true -Credential $Credentials -DomainName $domainname -DatabasePath "F:\Windows\NTDS" -LogPath "F:\Windows\NTDS" -SYSVOLPath "F:\Windows\SYSVOL" -Force:$true -safemodeadministratorpassword (convertto-securestring $adminPassword -asplaintext -force)
-Start-Sleep -s 15
+
 shutdown -r -t 30
 
 #Reboot Required

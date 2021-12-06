@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "986781199412822962"
+      "templateHash": "17808804339537056049"
     }
   },
   "parameters": {
@@ -301,7 +301,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "14588101785195992468"
+              "templateHash": "10453212782075854648"
             }
           },
           "parameters": {
@@ -696,8 +696,8 @@
               }
             },
             {
-              "type": "Microsoft.Network/virtualnetworkgateways",
-              "apiVersion": "2015-05-01-preview",
+              "type": "Microsoft.Network/virtualNetworkGateways",
+              "apiVersion": "2021-03-01",
               "name": "[parameters('gatewayName')]",
               "location": "[resourceGroup().location]",
               "properties": {
@@ -715,6 +715,10 @@
                     "name": "vnetGatewayConfig"
                   }
                 ],
+                "sku": {
+                  "name": "Basic",
+                  "tier": "Basic"
+                },
                 "gatewayType": "Vpn",
                 "vpnType": "RouteBased",
                 "enableBgp": false
@@ -731,7 +735,7 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "virtualNetworkGateway1": {
-                  "id": "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]"
+                  "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]"
                 },
                 "localNetworkGateway2": {
                   "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
@@ -741,7 +745,7 @@
                 "sharedKey": "[parameters('sharedKey')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]",
                 "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
               ]
             },

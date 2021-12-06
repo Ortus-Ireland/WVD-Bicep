@@ -1,39 +1,24 @@
-#======================================================================================
-# Define Variables
-
 param
 (
     [Parameter(Mandatory = $true)]
-    [string] $OUpath,
-    [string] $clientName,
-    [string] $officelocation,
-    [string] $UPNsuffix
+    [string] $OUpath = $args[0],
+    [string] $clientName = $args[1],
+    [string] $officelocation = $args[2],
+    [string] $UPNsuffix = $args[3]
 )
-
-
-
-
-#$domainname = "ad.metac.ie"                  # AD domain name 
-#$OUpath = "DC=ad,DC=metac,DC=ie"           # Path to Active Directory root
-#$companyname =  "METAC"                   # Name for company OU
-#$officelocation = "Mountrath"                      # Name of location OU
-#$UPNsuffix = "metac.ie"
 
 #======================================================================================
 
 # Remove DNS forwarder
-Get-DnsServerForwarder | Remove-DnsServerForwarder -Force
-Add-DnsServerForwarder -IPAddress 8.8.8.8 -PassThru
 Add-DnsServerForwarder -IPAddress 8.8.4.4 -PassThru
 
 # Enable Active Directory Recycle bin
 import-module activedirectory
-$tmp = "CN=Recycle Bin Feature,CN=Optional Features,CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration," + $OUpath
-Enable-ADOptionalFeature -Identity $tmp -Scope ForestOrConfigurationSet -Target $addomain
 
 # Add underscrore to company name
-$_clientName = "_" + $clientName
+$_clientName = "_" + $clientName | Out-File -FilePath c:\Ortus\log.txt -Append
 
+Import-Module ActiveDirectory 
 # Create OU in ACtive Directory
 New-ADOrganizationalUnit -Name $_clientName -Path $OUpath
 $OUpathtmp = "OU=" + $_clientName + "," + $OUpath
@@ -47,7 +32,7 @@ New-ADOrganizationalUnit -Name Computers -Path $OUpathtmp3
 New-ADOrganizationalUnit -Name Users -Path $OUpathtmp3
 
 #Set default OU for new computers
-$comppath = "OU=Computers,OU=" + $officelocation + ",OU=" + $_clientName + "," + $OUpath
+$comppath = "OU=Computers,OU=" + $officelocation + ",OU=" + $_clientName + "," + $OUpath | Out-File -FilePath c:\Ortus\log.txt -Append
 redircmp $comppath
 
 #import group policy for windows updates and link

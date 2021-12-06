@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "10536444374819046319"
+      "templateHash": "13312453215259100266"
     }
   },
   "parameters": {
@@ -19,6 +19,13 @@
       "type": "string",
       "metadata": {
         "description": "netbios name for client ie: rt"
+      }
+    },
+    "officelocation": {
+      "type": "string",
+      "defaultValue": "Dublin",
+      "metadata": {
+        "description": "Office location city eg: Dublin"
       }
     },
     "vnetPrefix": {
@@ -82,10 +89,6 @@
     "OUpath": {
       "type": "string",
       "defaultValue": "[format('DC=ad,DC={0},DC=ie', parameters('clientName'))]"
-    },
-    "officelocation": {
-      "type": "string",
-      "defaultValue": "Dublin"
     },
     "UPNsuffix": {
       "type": "string",
@@ -236,7 +239,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "17127495845919965778"
+              "templateHash": "9445216456403527850"
             }
           },
           "parameters": {
@@ -604,8 +607,8 @@
               }
             },
             {
-              "type": "Microsoft.Network/virtualnetworkgateways",
-              "apiVersion": "2015-05-01-preview",
+              "type": "Microsoft.Network/virtualNetworkGateways",
+              "apiVersion": "2021-03-01",
               "name": "[parameters('gatewayName')]",
               "location": "[resourceGroup().location]",
               "properties": {
@@ -623,6 +626,10 @@
                     "name": "vnetGatewayConfig"
                   }
                 ],
+                "sku": {
+                  "name": "Basic",
+                  "tier": "Basic"
+                },
                 "gatewayType": "Vpn",
                 "vpnType": "RouteBased",
                 "enableBgp": false
@@ -639,7 +646,7 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "virtualNetworkGateway1": {
-                  "id": "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]"
+                  "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]"
                 },
                 "localNetworkGateway2": {
                   "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
@@ -649,7 +656,7 @@
                 "sharedKey": "[parameters('sharedKey')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualnetworkgateways', parameters('gatewayName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('gatewayName'))]",
                 "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localGatewayName'))]"
               ]
             },
@@ -1387,6 +1394,7 @@
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
                 "typeHandlerVersion": "1.4",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
                     "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1.ps1"
@@ -1396,26 +1404,6 @@
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC1name'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/virtualMachines/extensions",
-              "apiVersion": "2021-07-01",
-              "name": "[format('{0}/WinRMCustomScriptExtension2', parameters('DC1name'))]",
-              "location": "[resourceGroup().location]",
-              "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.4",
-                "settings": {
-                  "fileUris": [
-                    "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1"
-                  ],
-                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC1part2.ps1 {0} {1} {2} {3}', parameters('OUpath'), parameters('clientName'), parameters('officelocation'), parameters('UPNsuffix'))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/wireguard', parameters('WGvmName')), '/')[0], split(format('{0}/wireguard', parameters('WGvmName')), '/')[1])]"
               ]
             },
             {
@@ -1431,12 +1419,12 @@
                   "fileUris": [
                     "https://ortusmediastorage.blob.core.windows.net/public/ConfigDC2.ps1"
                   ],
-                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC2.ps1 {0} {1}', parameters('domainName'), parameters('adminPassword'))]"
+                  "commandToExecute": "[format('powershell -ExecutionPolicy Unrestricted -file ConfigDC2.ps1 {0} {1} {2} {3} {4} {5}', parameters('domainName'), parameters('adminPassword'), parameters('OUpath'), parameters('clientName'), parameters('officelocation'), parameters('UPNsuffix'))]"
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/WinRMCustomScriptExtension2', parameters('DC1name')), '/')[0], split(format('{0}/WinRMCustomScriptExtension2', parameters('DC1name')), '/')[1])]",
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('DC2name'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', split(format('{0}/wireguard', parameters('WGvmName')), '/')[0], split(format('{0}/wireguard', parameters('WGvmName')), '/')[1])]"
               ]
             },
             {

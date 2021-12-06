@@ -13,6 +13,9 @@ param clientName string
 @description('netbios name for client ie: rt')
 param netBiosName string
 
+@description('Office location city eg: Dublin')
+param officelocation string = 'Dublin'
+
 @description('Prefix for client vnet eg: 172.16.173 ** check subnet file for next available **')
 param vnetPrefix string
 
@@ -42,7 +45,6 @@ param sharedKey string
 
 param domainName string = 'ad.${clientName}.ie'
 param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
-param officelocation string = 'Dublin'
 param UPNsuffix string = '${clientName}.ie'
 
 //Define Backend VM parameters

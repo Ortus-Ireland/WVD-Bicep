@@ -118,7 +118,7 @@ resource gatewayPublicIPName_resource 'Microsoft.Network/publicIPAddresses@2015-
   }
 }
 
-resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2015-05-01-preview' = {
+resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2021-03-01' = {
   name: gatewayName
   location: resourceGroup().location
   properties: {
@@ -136,6 +136,10 @@ resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2015-05-
         name: 'vnetGatewayConfig'
       }
     ]
+    sku: {
+      name: 'Basic'
+      tier: 'Basic'
+    }
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
     enableBgp: false

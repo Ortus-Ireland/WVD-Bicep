@@ -118,7 +118,7 @@ resource gatewayPublicIPName_resource 'Microsoft.Network/publicIPAddresses@2015-
   }
 }
 
-resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2015-05-01-preview' = {
+resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2021-03-01' = {
   name: gatewayName
   location: resourceGroup().location
   properties: {
@@ -136,6 +136,10 @@ resource gatewayName_resource 'Microsoft.Network/virtualNetworkGateways@2015-05-
         name: 'vnetGatewayConfig'
       }
     ]
+    sku: {
+      name: 'Basic'
+      tier: 'Basic'
+    }
     gatewayType: 'Vpn'
     vpnType: 'RouteBased'
     enableBgp: false
@@ -1033,35 +1037,18 @@ resource DC1vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
     publisher: 'Microsoft.Compute'
     type: 'CustomScriptExtension'
     typeHandlerVersion: '1.4'
+    autoUpgradeMinorVersion:true
     settings: {
       fileUris: [
         'https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1.ps1'
-      ]
-      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC1.ps1 ${domainName} ${netBiosName} ${adminPassword} ${OUpath} ${clientName} ${officelocation} ${UPNsuffix}'
+        ]
+      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC1.ps1 ${domainName} ${netBiosName} ${adminPassword} ${OUpath} ${clientName} ${officelocation} ${UPNsuffix}' 
     }
-  }
-  
+  } 
 }
 
-resource DC1part2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
-  name: '${DC1name}/WinRMCustomScriptExtension2'
-  location: resourceGroup().location
-  dependsOn: [
-    wg
-  ]
-  properties: {
-    publisher: 'Microsoft.Compute'
-    type: 'CustomScriptExtension'
-    typeHandlerVersion: '1.4'
-    settings: {
-      fileUris: [
-        'https://ortusmediastorage.blob.core.windows.net/public/ConfigDC1part2.ps1'
-      ]
-      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC1part2.ps1 ${OUpath} ${clientName} ${officelocation} ${UPNsuffix}'
-    }
-  }
-  
-}
+
+
 
 
 resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines/extensions@2021-07-01' = {
@@ -1069,7 +1056,7 @@ resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
   location: resourceGroup().location
   dependsOn: [
     DC2vm
-    DC1part2vmName_WinRMCustomScriptExtension
+    wg
   ]
   properties: {
     publisher: 'Microsoft.Compute'
@@ -1079,7 +1066,7 @@ resource DC2vmName_WinRMCustomScriptExtension 'Microsoft.Compute/virtualMachines
       fileUris: [
         'https://ortusmediastorage.blob.core.windows.net/public/ConfigDC2.ps1'
       ]
-      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC2.ps1 ${domainName} ${adminPassword}'
+      commandToExecute: 'powershell -ExecutionPolicy Unrestricted -file ConfigDC2.ps1 ${domainName} ${adminPassword} ${OUpath} ${clientName} ${officelocation} ${UPNsuffix}'
     }
   }
   
