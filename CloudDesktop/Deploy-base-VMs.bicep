@@ -1069,7 +1069,7 @@ param WireguardStartingIP string = '10'
 param WGadminPassword string
 param dnsLabelPrefix string = toLower('wireguard-${uniqueString(resourceGroup().id)}')
 param ubuntuOSVersion string = '20_04-lts'
-param WGvmSize string = 'Standard_F1s' 
+param WGvmSize string = 'Standard_B1ms' 
 param networkSecurityGroupName string = 'WG-NSG'
 var WGpublicIPAddressName = '${WGvmName}PublicIP'
 var networkInterfaceName = '${WGvmName}NetInt'

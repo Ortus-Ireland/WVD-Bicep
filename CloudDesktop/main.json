@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1.14562",
-      "templateHash": "17808804339537056049"
+      "templateHash": "12760532176198893170"
     }
   },
   "parameters": {
@@ -301,7 +301,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1.14562",
-              "templateHash": "10453212782075854648"
+              "templateHash": "10103402936182843935"
             }
           },
           "parameters": {
@@ -533,7 +533,7 @@
             },
             "WGvmSize": {
               "type": "string",
-              "defaultValue": "Standard_F1s"
+              "defaultValue": "Standard_B1ms"
             },
             "networkSecurityGroupName": {
               "type": "string",
