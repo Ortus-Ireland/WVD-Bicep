@@ -145,8 +145,7 @@ module DeployVMs 'Deploy-base-VMs.bicep' = {
     DC1CustomRDPport: DC1CustomRDPport
     DC2CustomRDPport: DC2CustomRDPport
     APPCustomRDPport: APPCustomRDPport
-    WVDCustomRDPport: AVDCustomRDPport
-    
+        
   }
 }
 
