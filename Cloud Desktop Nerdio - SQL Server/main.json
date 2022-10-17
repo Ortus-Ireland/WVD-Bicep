@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.11.1.770",
-      "templateHash": "16039360881772899239"
+      "templateHash": "1449191461182586086"
     }
   },
   "parameters": {
@@ -272,7 +272,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.11.1.770",
-              "templateHash": "12098293729399717350"
+              "templateHash": "9688052291872866124"
             }
           },
           "parameters": {
@@ -1252,7 +1252,7 @@
                   "osDisk": {
                     "name": "APP-osdisk",
                     "createOption": "FromImage",
-                    "diskSizeGB": 64,
+                    "diskSizeGB": 128,
                     "managedDisk": {
                       "storageAccountType": "Standard_LRS"
                     }
