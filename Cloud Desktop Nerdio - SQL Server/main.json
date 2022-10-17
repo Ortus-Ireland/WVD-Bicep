@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.11.1.770",
-      "templateHash": "1449191461182586086"
+      "templateHash": "12518845739693961779"
     }
   },
   "parameters": {
@@ -272,7 +272,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.11.1.770",
-              "templateHash": "9688052291872866124"
+              "templateHash": "12383464838564683384"
             }
           },
           "parameters": {
@@ -355,7 +355,7 @@
             },
             "APPpublicIPAddressName": {
               "type": "string",
-              "defaultValue": "APP-LB-PublicIP"
+              "defaultValue": "SQL-LB-PublicIP"
             },
             "LBname": {
               "type": "string",
@@ -369,7 +369,7 @@
             },
             "APPLBname": {
               "type": "string",
-              "defaultValue": "APP-LB"
+              "defaultValue": "SQL-LB"
             },
             "APPCustomRDPport": {
               "type": "int"
@@ -391,7 +391,7 @@
             },
             "APPname": {
               "type": "string",
-              "defaultValue": "APP"
+              "defaultValue": "SQL"
             },
             "vmSize": {
               "type": "string",
@@ -896,7 +896,7 @@
               "properties": {
                 "frontendIPConfigurations": [
                   {
-                    "name": "APPLBFE",
+                    "name": "SQLLBFE",
                     "properties": {
                       "publicIPAddress": {
                         "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('APPpublicIPAddressName'))]"
@@ -906,12 +906,12 @@
                 ],
                 "backendAddressPools": [
                   {
-                    "name": "APPLBBAP"
+                    "name": "SQLBBAP"
                   }
                 ],
                 "inboundNatRules": [
                   {
-                    "name": "APP-RDP-TCP",
+                    "name": "SQL-RDP-TCP",
                     "properties": {
                       "frontendIPConfiguration": {
                         "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
@@ -923,7 +923,7 @@
                     }
                   },
                   {
-                    "name": "APP-RDP-UDP",
+                    "name": "SQL-RDP-UDP",
                     "properties": {
                       "frontendIPConfiguration": {
                         "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
@@ -1046,12 +1046,12 @@
                       "privateIPAddress": "[parameters('APPprivateIP')]",
                       "loadBalancerBackendAddressPools": [
                         {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('APPLBname'), 'APPLBBAP')]"
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('APPLBname'), 'SQLLBBAP')]"
                         }
                       ],
                       "loadBalancerInboundNatRules": [
                         {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('APPLBname'), 'APP-RDP-TCP')]"
+                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('APPLBname'), 'SQL-RDP-TCP')]"
                         }
                       ]
                     }

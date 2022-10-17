@@ -286,7 +286,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 ///
 /////////////////////////////////////////////////
 
-param APPpublicIPAddressName string = 'APP-LB-PublicIP'
+param APPpublicIPAddressName string = 'SQL-LB-PublicIP'
 
 resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   name: APPpublicIPAddressName
@@ -389,11 +389,11 @@ resource Loadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
 
 //////////////////////////////////////////////////
 ///
-/// APP Load Balancer
+/// SQL Load Balancer
 ///
 /////////////////////////////////////////////////
 
-param APPLBname string = 'APP-LB'
+param APPLBname string = 'SQL-LB'
 param APPCustomRDPport int
   
 resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
@@ -405,7 +405,7 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
   properties: {
     frontendIPConfigurations: [
       {
-        name: 'APPLBFE'
+        name: 'SQLLBFE'
         properties: {
           publicIPAddress: {
             id: apppip.id
@@ -415,12 +415,12 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
     ]
     backendAddressPools: [
       {
-        name: 'APPLBBAP'
+        name: 'SQLBBAP'
       }
     ]
     inboundNatRules: [
       {
-        name: 'APP-RDP-TCP'
+        name: 'SQL-RDP-TCP'
         properties: {
           frontendIPConfiguration: {
             id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'APPLBFE')
@@ -432,7 +432,7 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
         }
       }
       {
-        name: 'APP-RDP-UDP'
+        name: 'SQL-RDP-UDP'
         properties: {
           frontendIPConfiguration: {
             id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'APPLBFE')
@@ -461,7 +461,7 @@ param adminPassword string
 
 param DC1name string = 'DC1'
 param DC2name string = 'DC2'
-param APPname string = 'APP'
+param APPname string = 'SQL'
 
 param vmSize string = 'Standard_B1ms' 
 param vnetPrefix string
@@ -601,12 +601,12 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
             privateIPAddress: APPprivateIP
             loadBalancerBackendAddressPools:[
               {
-                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', APPLBname, 'APPLBBAP')
+                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', APPLBname, 'SQLLBBAP')
               }
             ]
             loadBalancerInboundNatRules: [
               {
-                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', APPLBname, 'APP-RDP-TCP')
+                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', APPLBname, 'SQL-RDP-TCP')
               }
             ]
           }
