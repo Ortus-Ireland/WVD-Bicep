@@ -822,7 +822,7 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
         osDisk: {
           name: 'APP-osdisk'
           createOption: 'FromImage'
-          diskSizeGB: 64
+          diskSizeGB: 128
           managedDisk: {
             storageAccountType: 'Standard_LRS'
           }
