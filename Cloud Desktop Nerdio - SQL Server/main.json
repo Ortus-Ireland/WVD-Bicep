@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.11.1.770",
-      "templateHash": "12518845739693961779"
+      "templateHash": "10830954219820377666"
     }
   },
   "parameters": {
@@ -75,6 +75,37 @@
         "description": "Gateway VPN Shared Key"
       }
     },
+    "imageOffer": {
+      "type": "string",
+      "defaultValue": "sql2019-ws2022",
+      "allowedValues": [
+        "sql2019-ws2022",
+        "sql2019-ws2019",
+        "sql2017-ws2019",
+        "SQL2017-WS2016",
+        "SQL2016SP1-WS2016",
+        "SQL2016SP2-WS2016",
+        "SQL2014SP3-WS2012R2",
+        "SQL2014SP2-WS2012R2"
+      ],
+      "metadata": {
+        "description": "Windows Server and SQL Offer"
+      }
+    },
+    "sqlSku": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Standard",
+        "Enterprise",
+        "SQLDEV",
+        "Web",
+        "Express"
+      ],
+      "metadata": {
+        "description": "SQL Server Sku"
+      }
+    },
     "domainName": {
       "type": "string",
       "defaultValue": "[format('ad.{0}.ie', parameters('clientName'))]"
@@ -122,37 +153,6 @@
     "storageKind": {
       "type": "string",
       "defaultValue": "Storage"
-    },
-    "imageOffer": {
-      "type": "string",
-      "defaultValue": "sql2019-ws2022",
-      "allowedValues": [
-        "sql2019-ws2022",
-        "sql2019-ws2019",
-        "sql2017-ws2019",
-        "SQL2017-WS2016",
-        "SQL2016SP1-WS2016",
-        "SQL2016SP2-WS2016",
-        "SQL2014SP3-WS2012R2",
-        "SQL2014SP2-WS2012R2"
-      ],
-      "metadata": {
-        "description": "Windows Server and SQL Offer"
-      }
-    },
-    "sqlSku": {
-      "type": "string",
-      "defaultValue": "Standard",
-      "allowedValues": [
-        "Standard",
-        "Enterprise",
-        "SQLDEV",
-        "Web",
-        "Express"
-      ],
-      "metadata": {
-        "description": "SQL Server Sku"
-      }
     },
     "vnetaddressPrefix": {
       "type": "string",
@@ -272,7 +272,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.11.1.770",
-              "templateHash": "12383464838564683384"
+              "templateHash": "6697681869391468075"
             }
           },
           "parameters": {
@@ -446,6 +446,22 @@
               "type": "string",
               "defaultValue": "General"
             },
+            "sqlDataDisksCount": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "dataPath": {
+              "type": "string",
+              "defaultValue": "F:\\SQLData"
+            },
+            "sqlLogDisksCount": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "logPath": {
+              "type": "string",
+              "defaultValue": "G:\\SQLLog"
+            },
             "WGvmName": {
               "type": "string",
               "defaultValue": "Wireguard"
@@ -547,6 +563,16 @@
             "wgSubnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('wgSubnetName'))]",
             "availabilitySetNameVar": "AS",
             "diskConfigurationType": "NEW",
+            "dataDisksLuns": "[range(0, parameters('sqlDataDisksCount'))]",
+            "logDisksLuns": "[range(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))]",
+            "dataDisks": {
+              "createOption": "Empty",
+              "caching": "ReadOnly",
+              "writeAcceleratorEnabled": false,
+              "storageAccountType": "Premium_LRS",
+              "diskSizeGB": 128
+            },
+            "tempDbPath": "D:\\SQLTemp",
             "WGpublicIPAddressName": "[format('{0}PublicIP', parameters('WGvmName'))]",
             "networkInterfaceName": "[format('{0}NetInt', parameters('WGvmName'))]",
             "osDiskType": "Standard_LRS",
@@ -906,7 +932,7 @@
                 ],
                 "backendAddressPools": [
                   {
-                    "name": "SQLBBAP"
+                    "name": "SQLLBBAP"
                   }
                 ],
                 "inboundNatRules": [
@@ -914,7 +940,7 @@
                     "name": "SQL-RDP-TCP",
                     "properties": {
                       "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'SQLLBFE')]"
                       },
                       "protocol": "Tcp",
                       "frontendPort": "[parameters('APPCustomRDPport')]",
@@ -926,7 +952,7 @@
                     "name": "SQL-RDP-UDP",
                     "properties": {
                       "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'APPLBFE')]"
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'SQLLBFE')]"
                       },
                       "protocol": "Udp",
                       "frontendPort": "[parameters('APPCustomRDPport')]",
@@ -1243,6 +1269,22 @@
                   "vmSize": "[parameters('vmSize')]"
                 },
                 "storageProfile": {
+                  "copy": [
+                    {
+                      "name": "dataDisks",
+                      "count": "[length(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))))]",
+                      "input": {
+                        "lun": "[range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')]]",
+                        "createOption": "[variables('dataDisks').createOption]",
+                        "caching": "[if(greaterOrEquals(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')], parameters('sqlDataDisksCount')), 'None', variables('dataDisks').caching)]",
+                        "writeAcceleratorEnabled": "[variables('dataDisks').writeAcceleratorEnabled]",
+                        "diskSizeGB": "[variables('dataDisks').diskSizeGB]",
+                        "managedDisk": {
+                          "storageAccountType": "[variables('dataDisks').storageAccountType]"
+                        }
+                      }
+                    }
+                  ],
                   "imageReference": {
                     "publisher": "MicrosoftSQLServer",
                     "offer": "[parameters('imageOffer')]",
@@ -1256,18 +1298,7 @@
                     "managedDisk": {
                       "storageAccountType": "Standard_LRS"
                     }
-                  },
-                  "dataDisks": [
-                    {
-                      "name": "APP-datadisk1",
-                      "diskSizeGB": 128,
-                      "lun": 0,
-                      "createOption": "Empty",
-                      "managedDisk": {
-                        "storageAccountType": "Premium_LRS"
-                      }
-                    }
-                  ]
+                  }
                 },
                 "networkProfile": {
                   "networkInterfaces": [
@@ -1312,7 +1343,18 @@
                 "sqlServerLicenseType": "PAYG",
                 "storageConfigurationSettings": {
                   "diskConfigurationType": "[variables('diskConfigurationType')]",
-                  "storageWorkloadType": "[parameters('storageWorkloadType')]"
+                  "storageWorkloadType": "[parameters('storageWorkloadType')]",
+                  "sqlDataSettings": {
+                    "luns": "[variables('dataDisksLuns')]",
+                    "defaultFilePath": "[parameters('dataPath')]"
+                  },
+                  "sqlLogSettings": {
+                    "luns": "[variables('logDisksLuns')]",
+                    "defaultFilePath": "[parameters('logPath')]"
+                  },
+                  "sqlTempDbSettings": {
+                    "defaultFilePath": "[variables('tempDbPath')]"
+                  }
                 }
               },
               "dependsOn": [

@@ -40,22 +40,6 @@ param localGatewayAddressPrefix string
 @description('Gateway VPN Shared Key')
 param sharedKey string
 
-param domainName string = 'ad.${clientName}.ie'
-param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
-param officelocation string = 'Dublin'
-param UPNsuffix string = '${clientName}.ie'
-
-//Define Backend VM parameters
-
-param location string = 'northeurope'
-param resourceGroupName string = '${clientName}-rg'
-param WVDresourceGroupName string = '${clientName}-wvd-rg'
-param storageAccountName string = '${clientName}std'
-param DNSPort string = '53'
-param RDPPort string = '3389'
-param storageSKU string = 'Standard_LRS'
-param storageKind string = 'Storage'
-
 //Define SQL VM parameters
 
 @description('Windows Server and SQL Offer')
@@ -80,6 +64,24 @@ param imageOffer string = 'sql2019-ws2022'
   'Express'
 ])
 param sqlSku string = 'Standard'
+
+param domainName string = 'ad.${clientName}.ie'
+param OUpath string = 'DC=ad,DC=${clientName},DC=ie'
+param officelocation string = 'Dublin'
+param UPNsuffix string = '${clientName}.ie'
+
+//Define Backend VM parameters
+
+param location string = 'northeurope'
+param resourceGroupName string = '${clientName}-rg'
+param WVDresourceGroupName string = '${clientName}-wvd-rg'
+param storageAccountName string = '${clientName}std'
+param DNSPort string = '53'
+param RDPPort string = '3389'
+param storageSKU string = 'Standard_LRS'
+param storageKind string = 'Storage'
+
+
 
 
 

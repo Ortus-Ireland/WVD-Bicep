@@ -415,7 +415,7 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
     ]
     backendAddressPools: [
       {
-        name: 'SQLBBAP'
+        name: 'SQLLBBAP'
       }
     ]
     inboundNatRules: [
@@ -423,7 +423,7 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
         name: 'SQL-RDP-TCP'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'APPLBFE')
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'SQLLBFE')
           }
           protocol: 'Tcp'
           frontendPort: APPCustomRDPport
@@ -435,7 +435,7 @@ resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
         name: 'SQL-RDP-UDP'
         properties: {
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'APPLBFE')
+            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'SQLLBFE')
           }
           protocol: 'Udp'
           frontendPort: APPCustomRDPport
@@ -827,17 +827,16 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
             storageAccountType: 'Standard_LRS'
           }
         }
-        dataDisks: [
-          {
-            name: 'APP-datadisk1'
-            diskSizeGB: 128
-            lun: 0
-            createOption: 'Empty'
-            managedDisk: {
-              storageAccountType: 'Premium_LRS'
-            }
+        dataDisks: [for j in range(0, (sqlDataDisksCount + sqlLogDisksCount)): {
+          lun: j
+          createOption: dataDisks.createOption
+          caching: ((j >= sqlDataDisksCount) ? 'None' : dataDisks.caching)
+          writeAcceleratorEnabled: dataDisks.writeAcceleratorEnabled
+          diskSizeGB: dataDisks.diskSizeGB
+          managedDisk: {
+            storageAccountType: dataDisks.storageAccountType
           }
-        ]
+        }]
       }
       networkProfile: {
         networkInterfaces: [
@@ -869,6 +868,21 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
 
   var diskConfigurationType = 'NEW'
   param storageWorkloadType string = 'General'
+  param sqlDataDisksCount int = 1
+  param dataPath string = 'F:\\SQLData'
+  param sqlLogDisksCount int = 1
+  param logPath string = 'G:\\SQLLog'
+
+  var dataDisksLuns = range(0, sqlDataDisksCount)
+  var logDisksLuns = range(sqlDataDisksCount, sqlLogDisksCount)
+  var dataDisks = {
+  createOption: 'Empty'
+  caching: 'ReadOnly'
+  writeAcceleratorEnabled: false
+  storageAccountType: 'Premium_LRS'
+  diskSizeGB: 128
+  }
+  var tempDbPath = 'D:\\SQLTemp'
 
   resource sqlVirtualMachine 'Microsoft.SqlVirtualMachine/sqlVirtualMachines@2022-07-01-preview' = {
     name: APPname
@@ -880,9 +894,21 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
       storageConfigurationSettings: {
         diskConfigurationType: diskConfigurationType
         storageWorkloadType: storageWorkloadType
+        sqlDataSettings: {
+          luns: dataDisksLuns
+          defaultFilePath: dataPath
+        }
+        sqlLogSettings: {
+          luns: logDisksLuns
+          defaultFilePath: logPath
+        }
+        sqlTempDbSettings: {
+          defaultFilePath: tempDbPath
         }
       }
-    }  
+    }
+ }
+      
 
 //////////////////////////////////////////////////
 ///
