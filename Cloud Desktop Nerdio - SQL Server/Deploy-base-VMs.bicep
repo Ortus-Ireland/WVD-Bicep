@@ -261,14 +261,14 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2020-06-01' = {
 
 //////////////////////////////////////////////////
 ///
-///  Public IP for DC Load Balancer
+///  Public IP for DC1
 ///
 /////////////////////////////////////////////////
 
-param publicIPAddressName string = 'LB-PublicIP'
+param DC1publicIPAddressName string = 'DC1-PublicIP'
 
-resource pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: publicIPAddressName
+resource DC1pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: DC1publicIPAddressName
   location: location
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -282,14 +282,14 @@ resource pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
 
 //////////////////////////////////////////////////
 ///
-///  Public IP for APP Load Balancer
+///  Public IP for DC2 
 ///
 /////////////////////////////////////////////////
 
-param APPpublicIPAddressName string = 'SQL-LB-PublicIP'
+param DC2publicIPAddressName string = 'DC2-PublicIP'
 
-resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
-  name: APPpublicIPAddressName
+resource DC2pip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: DC2publicIPAddressName
   location: location
   properties: {
     publicIPAllocationMethod: 'Static'
@@ -301,149 +301,24 @@ resource apppip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
   }
 }
 
-
 //////////////////////////////////////////////////
 ///
-/// DC's Load Balancer
+///  Public IP for FILE
 ///
 /////////////////////////////////////////////////
 
-param LBname string = 'LB'
-param DC1CustomRDPport int
-param DC2CustomRDPport int
-  
-resource Loadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
-  name: LBname
-  location: location
-  sku:{
-    name: 'Basic'
-  }
-  properties: {
-    frontendIPConfigurations: [
-      {
-        name: 'LBFE'
-        properties: {
-          publicIPAddress: {
-            id: pip.id
-          }
-        }
-      }
-    ]
-    backendAddressPools: [
-      {
-        name: 'LBBAP'
-      }
-    ]
-    inboundNatRules: [
-      {
-        name: 'DC1-RDP-TCP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LBname, 'LBFE')
-          }
-          protocol: 'Tcp'
-          frontendPort: DC1CustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-      {
-        name: 'DC1-RDP-UDP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LBname, 'LBFE')
-          }
-          protocol: 'Udp'
-          frontendPort: DC1CustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-      {
-        name: 'DC2-RDP-TCP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LBname, 'LBFE')
-          }
-          protocol: 'Tcp'
-          frontendPort: DC2CustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-      {
-        name: 'DC2-RDP-UDP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', LBname, 'LBFE')
-          }
-          protocol: 'Udp'
-          frontendPort: DC2CustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-    ]
-  }
-}
+param FILEpublicIPAddressName string = 'File-PublicIP'
 
-//////////////////////////////////////////////////
-///
-/// SQL Load Balancer
-///
-/////////////////////////////////////////////////
-
-param APPLBname string = 'SQL-LB'
-param APPCustomRDPport int
-  
-resource APPLoadbalancer 'Microsoft.Network/loadBalancers@2018-10-01' = {
-  name: APPLBname
+resource FILEpip 'Microsoft.Network/publicIPAddresses@2020-06-01' = {
+  name: FILEpublicIPAddressName
   location: location
-  sku:{
-    name: 'Basic'
-  }
   properties: {
-    frontendIPConfigurations: [
-      {
-        name: 'SQLLBFE'
-        properties: {
-          publicIPAddress: {
-            id: apppip.id
-          }
-        }
-      }
-    ]
-    backendAddressPools: [
-      {
-        name: 'SQLLBBAP'
-      }
-    ]
-    inboundNatRules: [
-      {
-        name: 'SQL-RDP-TCP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'SQLLBFE')
-          }
-          protocol: 'Tcp'
-          frontendPort: APPCustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-      {
-        name: 'SQL-RDP-UDP'
-        properties: {
-          frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', APPLBname, 'SQLLBFE')
-          }
-          protocol: 'Udp'
-          frontendPort: APPCustomRDPport
-          backendPort: 3389
-          enableFloatingIP: false
-        }
-      }
-    ]
+    publicIPAllocationMethod: 'Static'
+    publicIPAddressVersion: 'IPv4'
+    idleTimeoutInMinutes: 4
+  }
+  sku: {
+    name: 'Basic'
   }
 }
 
@@ -461,50 +336,29 @@ param adminPassword string
 
 param DC1name string = 'DC1'
 param DC2name string = 'DC2'
-param APPname string = 'SQL'
+param FILEname string = 'FILE'
 
 param vmSize string = 'Standard_B1ms' 
 param vnetPrefix string
 
 param DC1networkInterfaceName string = 'DC1interface'
 param DC2networkInterfaceName string = 'DC2interface'
-param APPnetworkInterfaceName string = 'APPinterface'
+param FILEnetworkInterfaceName string = 'FILEinterface'
 
 
 param DC1diagStorageAccountName string = concat('dc1diags', uniqueString(resourceGroup().id))
 param DC2diagStorageAccountName string = concat('dc2diags', uniqueString(resourceGroup().id))
-param APPdiagStorageAccountName string = concat('appdiags', uniqueString(resourceGroup().id))
+param APPdiagStorageAccountName string = concat('filediags', uniqueString(resourceGroup().id))
 
 
 param DC1privateIP string = '${vnetPrefix}.10'
 param DC2privateIP string = '${vnetPrefix}.11'
-param APPprivateIP string = '${vnetPrefix}.12'
+param FILEprivateIP string = '${vnetPrefix}.12'
 
 
 
 var subnetRef = '${vnet.id}/subnets/${subnetName}'
 var wgSubnetRef = '${vnet.id}/subnets/${wgSubnetName}'
-
-var availabilitySetNameVar = 'AS'
-
-//////////////////////////////////////////////////
-///
-///  Create Availability Set
-///
-/////////////////////////////////////////////////
-
-resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
-    name: availabilitySetNameVar
-    location: location
-    sku:{
-      name: 'Aligned'
-    }
-    properties: {
-      platformFaultDomainCount: 2
-      platformUpdateDomainCount: 5
-    }
-  }
-
 
 //////////////////////////////////////////////////
 ///
@@ -516,28 +370,20 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
     name: DC1networkInterfaceName
     location: location
     dependsOn:[
-      Loadbalancer
     ]
     properties: {
       ipConfigurations: [
         {
           name: 'ipconfig1'
           properties: {
+            publicIPAddress: {
+              id: DC1pip.id
+            }
             subnet: {
               id: subnetRef
             }
             privateIPAllocationMethod: 'Static'
             privateIPAddress: DC1privateIP
-            loadBalancerBackendAddressPools:[
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', LBname, 'LBBAP')
-              }
-            ]
-            loadBalancerInboundNatRules: [
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', LBname, 'DC1-RDP-TCP') 
-              }
-            ]
           }
         }
       ]
@@ -551,29 +397,20 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
     name: DC2networkInterfaceName
     location: location
     dependsOn:[
-      Loadbalancer
     ]
     properties: {
       ipConfigurations: [
         {
           name: 'ipconfig1'
           properties: {
+            publicIPAddress: {
+              id: DC2pip.id
+            }
             subnet: {
               id: subnetRef
             }
             privateIPAllocationMethod: 'Static'
             privateIPAddress: DC2privateIP
-            loadBalancerBackendAddressPools:[
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', LBname, 'LBBAP')
-              }
-            ]
-            loadBalancerInboundNatRules: [
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', LBname, 'DC2-RDP-TCP')
-              }
-            ]
-
           }
         }
       ]
@@ -583,32 +420,24 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
     }
   }
 
-  resource APPnic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
-    name: APPnetworkInterfaceName
+  resource FILEnic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
+    name: FILEnetworkInterfaceName
     location: location
     dependsOn:[
-      APPLoadbalancer
     ]
     properties: {
       ipConfigurations: [
         {
           name: 'ipconfig1'
           properties: {
+            publicIPAddress: {
+              id: FILEpip.id
+            }
             subnet: {
               id: subnetRef
             }
             privateIPAllocationMethod: 'Static'
-            privateIPAddress: APPprivateIP
-            loadBalancerBackendAddressPools:[
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/backendAddressPools', APPLBname, 'SQLLBBAP')
-              }
-            ]
-            loadBalancerInboundNatRules: [
-              {
-                id: resourceId('Microsoft.Network/loadBalancers/inboundNatRules', APPLBname, 'SQL-RDP-TCP')
-              }
-            ]
+            privateIPAddress: FILEprivateIP     
           }
         }
       ]
@@ -628,10 +457,15 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   resource DC1vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
     name: DC1name
     location: location
+    tags:{
+      Domain_Controller : 'Primary'
+      Role: 'WireGuardKeyHost'
+    } 
     dependsOn:[
       DC1nic
     ]
     properties: {
+      
       osProfile: {
         computerName: DC1name
         adminUsername: localAdminUser
@@ -639,9 +473,6 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
         windowsConfiguration: {
           provisionVMAgent: true
         }
-      }
-      availabilitySet: {
-        id: resourceId('Microsoft.Compute/availabilitySets', availabilitySetNameVar) 
       }
       hardwareProfile: {
         vmSize: vmSize
@@ -664,11 +495,11 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
         dataDisks: [
           {
           name: 'DC1-datadisk'  
-          diskSizeGB: 32
+          diskSizeGB: 4
           lun: 0
           createOption: 'Empty'
           managedDisk: {
-            storageAccountType: 'Standard_LRS'
+            storageAccountType: 'Premium_LRS'
           }
           }
         ]
@@ -710,10 +541,14 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   resource DC2vm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
     name: DC2name
     location: location
+    tags: {
+      Domain_Controller : 'Secondary'
+    }
     dependsOn:[
       DC2nic
     ]
     properties: {
+      
       osProfile: {
         computerName: DC2name
         adminUsername: localAdminUser
@@ -721,9 +556,6 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
         windowsConfiguration: {
           provisionVMAgent: true
         }
-      }
-      availabilitySet: {
-        id: resourceId('Microsoft.Compute/availabilitySets', availabilitySetNameVar) 
       }
       hardwareProfile: {
         vmSize: vmSize
@@ -746,11 +578,11 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
         dataDisks: [
           {
             name: 'DC2-datadisk'
-            diskSizeGB: 32
+            diskSizeGB: 4
             lun: 0
             createOption: 'Empty'
             managedDisk: {
-              storageAccountType: 'Standard_LRS'
+              storageAccountType: 'Premium_LRS'
             }
             }
         ]
@@ -790,19 +622,16 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   ///
   /////////////////////////////////////////////////
 
-  param imageOffer string
-  param sqlSku string
-  
 
-  resource APPvm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
-    name: APPname
+  resource FILEvm 'Microsoft.Compute/virtualMachines@2020-06-01' = {
+    name: FILEname
     location: location
     dependsOn:[
-      APPnic
+      FILEnic
     ]
     properties: {
       osProfile: {
-        computerName: APPname
+        computerName: FILEname
         adminUsername: localAdminUser
         adminPassword: adminPassword
         windowsConfiguration: {
@@ -814,29 +643,30 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
       }
       storageProfile: {
         imageReference: {
-          publisher: 'MicrosoftSQLServer'
-          offer: imageOffer
-          sku: sqlSku
+          publisher: 'MicrosoftWindowsServer'
+          offer: 'WindowsServer'
+          sku: '2022-Datacenter-smalldisk'
           version: 'latest'
         }
         osDisk: {
-          name: 'APP-osdisk'
+          name: 'FILE-osdisk'
           createOption: 'FromImage'
-          diskSizeGB: 128
+          diskSizeGB: 64
           managedDisk: {
             storageAccountType: 'Standard_LRS'
           }
         }
-        dataDisks: [for j in range(0, (sqlDataDisksCount + sqlLogDisksCount)): {
-          lun: j
-          createOption: dataDisks.createOption
-          caching: ((j >= sqlDataDisksCount) ? 'None' : dataDisks.caching)
-          writeAcceleratorEnabled: dataDisks.writeAcceleratorEnabled
-          diskSizeGB: dataDisks.diskSizeGB
-          managedDisk: {
-            storageAccountType: dataDisks.storageAccountType
+        dataDisks: [
+          {
+            name: 'FILE-datadisk1'
+            diskSizeGB: 128
+            lun: 0
+            createOption: 'Empty'
+            managedDisk: {
+              storageAccountType: 'Premium_LRS'
+            }
           }
-        }]
+        ]
       }
       networkProfile: {
         networkInterfaces: [
@@ -844,20 +674,20 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
             properties: {
               primary: true
             }
-            id: APPnic.id
+            id: FILEnic.id
           }
         ]
       }
       diagnosticsProfile: {
         bootDiagnostics: {
           enabled: true
-          storageUri: APPdiagsAccount.properties.primaryEndpoints.blob
+          storageUri: FILEdiagsAccount.properties.primaryEndpoints.blob
         }
       }
     }
   }
   
-  resource APPdiagsAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
+  resource FILEdiagsAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
     name: APPdiagStorageAccountName
     location: location
     sku: {
@@ -865,50 +695,6 @@ resource availabilitySetName 'Microsoft.Compute/availabilitySets@2020-12-01' = {
     }
     kind: 'Storage'
   }
-
-  var diskConfigurationType = 'NEW'
-  param storageWorkloadType string = 'General'
-  param sqlDataDisksCount int = 1
-  param dataPath string = 'F:\\SQLData'
-  param sqlLogDisksCount int = 1
-  param logPath string = 'G:\\SQLLog'
-
-  var dataDisksLuns = range(0, sqlDataDisksCount)
-  var logDisksLuns = range(sqlDataDisksCount, sqlLogDisksCount)
-  var dataDisks = {
-  createOption: 'Empty'
-  caching: 'ReadOnly'
-  writeAcceleratorEnabled: false
-  storageAccountType: 'Premium_LRS'
-  diskSizeGB: 128
-  }
-  var tempDbPath = 'D:\\SQLTemp'
-
-  resource sqlVirtualMachine 'Microsoft.SqlVirtualMachine/sqlVirtualMachines@2022-07-01-preview' = {
-    name: APPname
-    location: location
-    properties: {
-      virtualMachineResourceId: APPvm.id
-      sqlManagement: 'Full'
-      sqlServerLicenseType: 'PAYG'
-      storageConfigurationSettings: {
-        diskConfigurationType: diskConfigurationType
-        storageWorkloadType: storageWorkloadType
-        sqlDataSettings: {
-          luns: dataDisksLuns
-          defaultFilePath: dataPath
-        }
-        sqlLogSettings: {
-          luns: logDisksLuns
-          defaultFilePath: logPath
-        }
-        sqlTempDbSettings: {
-          defaultFilePath: tempDbPath
-        }
-      }
-    }
- }
-      
 
 //////////////////////////////////////////////////
 ///
@@ -1104,9 +890,6 @@ resource wg 'Microsoft.Compute/virtualMachines/extensions@2020-12-01' = {
 @description('Name of the Vault')
 param vaultName_var string = '${clientName}-Backup'
 
-@description('Resource group of Compute VM containing the workload')
-param vmResourceGroup string = resourceGroup().name
-
 @description('Backup Policy Name')
 param policyName string = 'AzureBackup'
 
@@ -1114,10 +897,8 @@ var backupFabric = 'Azure'
 
 var protectionContainerDC1 = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
 var protectedItemDC1 = 'vm;iaasvmcontainerv2;${resourceGroup().name};${DC1name}'
-var protectionContainerAPP = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${APPname}'
-var protectedItemAPP = 'vm;iaasvmcontainerv2;${resourceGroup().name};${APPname}'
-
-var testPolicy = 'DefaultPoliy'
+var protectionContainerFILE = 'iaasvmcontainer;iaasvmcontainerv2;${resourceGroup().name};${FILEname}'
+var protectedItemFILE = 'vm;iaasvmcontainerv2;${resourceGroup().name};${FILEname}'
 
 resource vaultName 'Microsoft.RecoveryServices/vaults@2020-02-02' = {
   name: vaultName_var
@@ -1153,11 +934,11 @@ resource vaultName_backupFabric_protectionContainer_protectedItem 'Microsoft.Rec
 }
 
 resource vaultName_backupFabric_protectionContainer_protectedItemAPP 'Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems@2020-02-02' = {
-  name: '${vaultName_var}/${backupFabric}/${protectionContainerAPP}/${protectedItemAPP}'
+  name: '${vaultName_var}/${backupFabric}/${protectionContainerFILE}/${protectedItemFILE}'
   properties: {
     protectedItemType: 'Microsoft.Compute/virtualMachines'
     policyId: vaultName_policyName.id
-    sourceResourceId: APPvm.id
+    sourceResourceId: FILEvm.id
   }
   dependsOn: [
     vaultName
@@ -1191,20 +972,8 @@ resource vaultName_policyName 'Microsoft.RecoveryServices/vaults/backupPolicies@
             '2021-04-07T03:00:00.000Z'
         ]
         retentionDuration: {
-          count: 180
+          count: 92
           durationType: 'Days'
-        }
-      }
-      weeklySchedule: {
-        daysOfTheWeek: [
-            'Sunday'
-        ]
-        retentionTimes: [
-            '2021-04-07T03:00:00.000Z'
-        ]
-        retentionDuration: {
-          count: 12
-          durationType: 'Weeks'
         }
       }
       monthlySchedule: {
@@ -1221,29 +990,8 @@ resource vaultName_policyName 'Microsoft.RecoveryServices/vaults/backupPolicies@
           '2021-04-07T03:00:00.000Z'
         ]
         retentionDuration: {
-          count: 60
+          count: 12
           durationType: 'Months'
-        }
-      }
-      yearlySchedule: {
-        retentionScheduleFormatType: 'Weekly'
-        monthsOfYear: [
-            'January'
-        ]
-        retentionScheduleWeekly: {
-          daysOfTheWeek: [
-            'Sunday'
-          ]
-          weeksOfTheMonth: [
-            'First'
-          ]
-        }
-        retentionTimes: [
-            '2021-04-07T03:00:00.000Z'
-        ]
-        retentionDuration: {
-          count: 7
-          durationType: 'Years'
         }
       }
       retentionPolicyType: 'LongTermRetentionPolicy'
@@ -1279,3 +1027,12 @@ resource routeTable 'Microsoft.Network/routeTables@2020-07-01' = {
     disableBgpRoutePropagation: false
   }
 }
+
+
+
+output vnet object = vnet
+output nsgID string = nsg.id
+output subnetRef string = subnetRef
+output vaultName_var string = vaultName_var
+output vaultName_policyName string = vaultName_policyName.id
+

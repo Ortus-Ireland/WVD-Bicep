@@ -4,11 +4,21 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.11.1.770",
-      "templateHash": "10830954219820377666"
+      "version": "0.14.85.62628",
+      "templateHash": "3496370705727871810"
     }
   },
   "parameters": {
+    "deploymentType": {
+      "type": "string",
+      "allowedValues": [
+        "Cloud Workplace / AVD no SQL",
+        "AVD with sql2019-ws2022"
+      ],
+      "metadata": {
+        "description": "Deployment Type"
+      }
+    },
     "clientName": {
       "type": "string",
       "metadata": {
@@ -34,33 +44,15 @@
       }
     },
     "adminPassword": {
-      "type": "secureString",
+      "type": "securestring",
       "metadata": {
         "description": "VM local Admin Password"
       }
     },
     "WGadminPassword": {
-      "type": "secureString",
+      "type": "securestring",
       "metadata": {
         "description": "Wireguard Admin Password"
-      }
-    },
-    "DC1CustomRDPport": {
-      "type": "int",
-      "metadata": {
-        "description": "Custom Port for DC1 between 50000 and 63000"
-      }
-    },
-    "DC2CustomRDPport": {
-      "type": "int",
-      "metadata": {
-        "description": "Custom Port for DC2 between 50000 and 63000"
-      }
-    },
-    "APPCustomRDPport": {
-      "type": "int",
-      "metadata": {
-        "description": "Custom Port for APP/SQL between 50000 and 63000"
       }
     },
     "localGatewayAddressPrefix": {
@@ -78,16 +70,6 @@
     "imageOffer": {
       "type": "string",
       "defaultValue": "sql2019-ws2022",
-      "allowedValues": [
-        "sql2019-ws2022",
-        "sql2019-ws2019",
-        "sql2017-ws2019",
-        "SQL2017-WS2016",
-        "SQL2016SP1-WS2016",
-        "SQL2016SP2-WS2016",
-        "SQL2014SP3-WS2012R2",
-        "SQL2014SP2-WS2012R2"
-      ],
       "metadata": {
         "description": "Windows Server and SQL Offer"
       }
@@ -95,13 +77,6 @@
     "sqlSku": {
       "type": "string",
       "defaultValue": "Standard",
-      "allowedValues": [
-        "Standard",
-        "Enterprise",
-        "SQLDEV",
-        "Web",
-        "Express"
-      ],
       "metadata": {
         "description": "SQL Server Sku"
       }
@@ -130,21 +105,9 @@
       "type": "string",
       "defaultValue": "[format('{0}-rg', parameters('clientName'))]"
     },
-    "WVDresourceGroupName": {
-      "type": "string",
-      "defaultValue": "[format('{0}-wvd-rg', parameters('clientName'))]"
-    },
     "storageAccountName": {
       "type": "string",
       "defaultValue": "[format('{0}std', parameters('clientName'))]"
-    },
-    "DNSPort": {
-      "type": "string",
-      "defaultValue": "53"
-    },
-    "RDPPort": {
-      "type": "string",
-      "defaultValue": "3389"
     },
     "storageSKU": {
       "type": "string",
@@ -248,21 +211,6 @@
           },
           "UPNsuffix": {
             "value": "[parameters('UPNsuffix')]"
-          },
-          "DC1CustomRDPport": {
-            "value": "[parameters('DC1CustomRDPport')]"
-          },
-          "DC2CustomRDPport": {
-            "value": "[parameters('DC2CustomRDPport')]"
-          },
-          "APPCustomRDPport": {
-            "value": "[parameters('APPCustomRDPport')]"
-          },
-          "imageOffer": {
-            "value": "[parameters('imageOffer')]"
-          },
-          "sqlSku": {
-            "value": "[parameters('sqlSku')]"
           }
         },
         "template": {
@@ -271,8 +219,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.11.1.770",
-              "templateHash": "6697681869391468075"
+              "version": "0.14.85.62628",
+              "templateHash": "11031799260868406840"
             }
           },
           "parameters": {
@@ -349,37 +297,24 @@
               "type": "string",
               "defaultValue": "NSG"
             },
-            "publicIPAddressName": {
+            "DC1publicIPAddressName": {
               "type": "string",
-              "defaultValue": "LB-PublicIP"
+              "defaultValue": "DC1-PublicIP"
             },
-            "APPpublicIPAddressName": {
+            "DC2publicIPAddressName": {
               "type": "string",
-              "defaultValue": "SQL-LB-PublicIP"
+              "defaultValue": "DC2-PublicIP"
             },
-            "LBname": {
+            "FILEpublicIPAddressName": {
               "type": "string",
-              "defaultValue": "LB"
-            },
-            "DC1CustomRDPport": {
-              "type": "int"
-            },
-            "DC2CustomRDPport": {
-              "type": "int"
-            },
-            "APPLBname": {
-              "type": "string",
-              "defaultValue": "SQL-LB"
-            },
-            "APPCustomRDPport": {
-              "type": "int"
+              "defaultValue": "File-PublicIP"
             },
             "localAdminUser": {
               "type": "string",
               "defaultValue": "localadmin"
             },
             "adminPassword": {
-              "type": "secureString"
+              "type": "securestring"
             },
             "DC1name": {
               "type": "string",
@@ -389,9 +324,9 @@
               "type": "string",
               "defaultValue": "DC2"
             },
-            "APPname": {
+            "FILEname": {
               "type": "string",
-              "defaultValue": "SQL"
+              "defaultValue": "FILE"
             },
             "vmSize": {
               "type": "string",
@@ -408,9 +343,9 @@
               "type": "string",
               "defaultValue": "DC2interface"
             },
-            "APPnetworkInterfaceName": {
+            "FILEnetworkInterfaceName": {
               "type": "string",
-              "defaultValue": "APPinterface"
+              "defaultValue": "FILEinterface"
             },
             "DC1diagStorageAccountName": {
               "type": "string",
@@ -422,7 +357,7 @@
             },
             "APPdiagStorageAccountName": {
               "type": "string",
-              "defaultValue": "[concat('appdiags', uniqueString(resourceGroup().id))]"
+              "defaultValue": "[concat('filediags', uniqueString(resourceGroup().id))]"
             },
             "DC1privateIP": {
               "type": "string",
@@ -432,35 +367,9 @@
               "type": "string",
               "defaultValue": "[format('{0}.11', parameters('vnetPrefix'))]"
             },
-            "APPprivateIP": {
+            "FILEprivateIP": {
               "type": "string",
               "defaultValue": "[format('{0}.12', parameters('vnetPrefix'))]"
-            },
-            "imageOffer": {
-              "type": "string"
-            },
-            "sqlSku": {
-              "type": "string"
-            },
-            "storageWorkloadType": {
-              "type": "string",
-              "defaultValue": "General"
-            },
-            "sqlDataDisksCount": {
-              "type": "int",
-              "defaultValue": 1
-            },
-            "dataPath": {
-              "type": "string",
-              "defaultValue": "F:\\SQLData"
-            },
-            "sqlLogDisksCount": {
-              "type": "int",
-              "defaultValue": 1
-            },
-            "logPath": {
-              "type": "string",
-              "defaultValue": "G:\\SQLLog"
             },
             "WGvmName": {
               "type": "string",
@@ -534,13 +443,6 @@
                 "description": "Name of the Vault"
               }
             },
-            "vmResourceGroup": {
-              "type": "string",
-              "defaultValue": "[resourceGroup().name]",
-              "metadata": {
-                "description": "Resource group of Compute VM containing the workload"
-              }
-            },
             "policyName": {
               "type": "string",
               "defaultValue": "AzureBackup",
@@ -561,18 +463,6 @@
             "gatewaySubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets/', parameters('vnetName'), parameters('gatewaySubnetName'))]",
             "subnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('subnetName'))]",
             "wgSubnetRef": "[format('{0}/subnets/{1}', resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), parameters('wgSubnetName'))]",
-            "availabilitySetNameVar": "AS",
-            "diskConfigurationType": "NEW",
-            "dataDisksLuns": "[range(0, parameters('sqlDataDisksCount'))]",
-            "logDisksLuns": "[range(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))]",
-            "dataDisks": {
-              "createOption": "Empty",
-              "caching": "ReadOnly",
-              "writeAcceleratorEnabled": false,
-              "storageAccountType": "Premium_LRS",
-              "diskSizeGB": 128
-            },
-            "tempDbPath": "D:\\SQLTemp",
             "WGpublicIPAddressName": "[format('{0}PublicIP', parameters('WGvmName'))]",
             "networkInterfaceName": "[format('{0}NetInt', parameters('WGvmName'))]",
             "osDiskType": "Standard_LRS",
@@ -590,9 +480,8 @@
             "backupFabric": "Azure",
             "protectionContainerDC1": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
             "protectedItemDC1": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('DC1name'))]",
-            "protectionContainerAPP": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('APPname'))]",
-            "protectedItemAPP": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('APPname'))]",
-            "testPolicy": "DefaultPoliy",
+            "protectionContainerFILE": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('FILEname'))]",
+            "protectedItemFILE": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('FILEname'))]",
             "BackupPolicyName": "[format('{0}/{1}', parameters('vaultName_var'), parameters('policyName'))]",
             "wireguardPrefix": "10.200.200.0/24"
           },
@@ -807,7 +696,7 @@
             {
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('publicIPAddressName')]",
+              "name": "[parameters('DC1publicIPAddressName')]",
               "location": "[parameters('location')]",
               "properties": {
                 "publicIPAllocationMethod": "Static",
@@ -821,7 +710,7 @@
             {
               "type": "Microsoft.Network/publicIPAddresses",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('APPpublicIPAddressName')]",
+              "name": "[parameters('DC2publicIPAddressName')]",
               "location": "[parameters('location')]",
               "properties": {
                 "publicIPAllocationMethod": "Static",
@@ -833,150 +722,17 @@
               }
             },
             {
-              "type": "Microsoft.Network/loadBalancers",
-              "apiVersion": "2018-10-01",
-              "name": "[parameters('LBname')]",
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('FILEpublicIPAddressName')]",
               "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
               "sku": {
                 "name": "Basic"
-              },
-              "properties": {
-                "frontendIPConfigurations": [
-                  {
-                    "name": "LBFE",
-                    "properties": {
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-                      }
-                    }
-                  }
-                ],
-                "backendAddressPools": [
-                  {
-                    "name": "LBBAP"
-                  }
-                ],
-                "inboundNatRules": [
-                  {
-                    "name": "DC1-RDP-TCP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
-                      },
-                      "protocol": "Tcp",
-                      "frontendPort": "[parameters('DC1CustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  },
-                  {
-                    "name": "DC1-RDP-UDP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
-                      },
-                      "protocol": "Udp",
-                      "frontendPort": "[parameters('DC1CustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  },
-                  {
-                    "name": "DC2-RDP-TCP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
-                      },
-                      "protocol": "Tcp",
-                      "frontendPort": "[parameters('DC2CustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  },
-                  {
-                    "name": "DC2-RDP-UDP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('LBname'), 'LBFE')]"
-                      },
-                      "protocol": "Udp",
-                      "frontendPort": "[parameters('DC2CustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/loadBalancers",
-              "apiVersion": "2018-10-01",
-              "name": "[parameters('APPLBname')]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Basic"
-              },
-              "properties": {
-                "frontendIPConfigurations": [
-                  {
-                    "name": "SQLLBFE",
-                    "properties": {
-                      "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('APPpublicIPAddressName'))]"
-                      }
-                    }
-                  }
-                ],
-                "backendAddressPools": [
-                  {
-                    "name": "SQLLBBAP"
-                  }
-                ],
-                "inboundNatRules": [
-                  {
-                    "name": "SQL-RDP-TCP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'SQLLBFE')]"
-                      },
-                      "protocol": "Tcp",
-                      "frontendPort": "[parameters('APPCustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  },
-                  {
-                    "name": "SQL-RDP-UDP",
-                    "properties": {
-                      "frontendIPConfiguration": {
-                        "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', parameters('APPLBname'), 'SQLLBFE')]"
-                      },
-                      "protocol": "Udp",
-                      "frontendPort": "[parameters('APPCustomRDPport')]",
-                      "backendPort": 3389,
-                      "enableFloatingIP": false
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('APPpublicIPAddressName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Compute/availabilitySets",
-              "apiVersion": "2020-12-01",
-              "name": "[variables('availabilitySetNameVar')]",
-              "location": "[parameters('location')]",
-              "sku": {
-                "name": "Aligned"
-              },
-              "properties": {
-                "platformFaultDomainCount": 2,
-                "platformUpdateDomainCount": 5
               }
             },
             {
@@ -989,21 +745,14 @@
                   {
                     "name": "ipconfig1",
                     "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('DC1publicIPAddressName'))]"
+                      },
                       "subnet": {
                         "id": "[variables('subnetRef')]"
                       },
                       "privateIPAllocationMethod": "Static",
-                      "privateIPAddress": "[parameters('DC1privateIP')]",
-                      "loadBalancerBackendAddressPools": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('LBname'), 'LBBAP')]"
-                        }
-                      ],
-                      "loadBalancerInboundNatRules": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('LBname'), 'DC1-RDP-TCP')]"
-                        }
-                      ]
+                      "privateIPAddress": "[parameters('DC1privateIP')]"
                     }
                   }
                 ],
@@ -1012,7 +761,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', parameters('LBname'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('DC1publicIPAddressName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
                 "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
               ]
@@ -1027,21 +776,14 @@
                   {
                     "name": "ipconfig1",
                     "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('DC2publicIPAddressName'))]"
+                      },
                       "subnet": {
                         "id": "[variables('subnetRef')]"
                       },
                       "privateIPAllocationMethod": "Static",
-                      "privateIPAddress": "[parameters('DC2privateIP')]",
-                      "loadBalancerBackendAddressPools": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('LBname'), 'LBBAP')]"
-                        }
-                      ],
-                      "loadBalancerInboundNatRules": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('LBname'), 'DC2-RDP-TCP')]"
-                        }
-                      ]
+                      "privateIPAddress": "[parameters('DC2privateIP')]"
                     }
                   }
                 ],
@@ -1050,7 +792,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', parameters('LBname'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('DC2publicIPAddressName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
                 "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
               ]
@@ -1058,28 +800,21 @@
             {
               "type": "Microsoft.Network/networkInterfaces",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('APPnetworkInterfaceName')]",
+              "name": "[parameters('FILEnetworkInterfaceName')]",
               "location": "[parameters('location')]",
               "properties": {
                 "ipConfigurations": [
                   {
                     "name": "ipconfig1",
                     "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('FILEpublicIPAddressName'))]"
+                      },
                       "subnet": {
                         "id": "[variables('subnetRef')]"
                       },
                       "privateIPAllocationMethod": "Static",
-                      "privateIPAddress": "[parameters('APPprivateIP')]",
-                      "loadBalancerBackendAddressPools": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('APPLBname'), 'SQLLBBAP')]"
-                        }
-                      ],
-                      "loadBalancerInboundNatRules": [
-                        {
-                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatRules', parameters('APPLBname'), 'SQL-RDP-TCP')]"
-                        }
-                      ]
+                      "privateIPAddress": "[parameters('FILEprivateIP')]"
                     }
                   }
                 ],
@@ -1088,7 +823,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Network/loadBalancers', parameters('APPLBname'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('FILEpublicIPAddressName'))]",
                 "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]",
                 "[resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName'))]"
               ]
@@ -1098,6 +833,10 @@
               "apiVersion": "2020-06-01",
               "name": "[parameters('DC1name')]",
               "location": "[parameters('location')]",
+              "tags": {
+                "Domain_Controller": "Primary",
+                "Role": "WireGuardKeyHost"
+              },
               "properties": {
                 "osProfile": {
                   "computerName": "[parameters('DC1name')]",
@@ -1106,9 +845,6 @@
                   "windowsConfiguration": {
                     "provisionVMAgent": true
                   }
-                },
-                "availabilitySet": {
-                  "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetNameVar'))]"
                 },
                 "hardwareProfile": {
                   "vmSize": "[parameters('vmSize')]"
@@ -1131,11 +867,11 @@
                   "dataDisks": [
                     {
                       "name": "DC1-datadisk",
-                      "diskSizeGB": 32,
+                      "diskSizeGB": 4,
                       "lun": 0,
                       "createOption": "Empty",
                       "managedDisk": {
-                        "storageAccountType": "Standard_LRS"
+                        "storageAccountType": "Premium_LRS"
                       }
                     }
                   ]
@@ -1153,7 +889,7 @@
                 "diagnosticsProfile": {
                   "bootDiagnostics": {
                     "enabled": true,
-                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC1diagStorageAccountName'))).primaryEndpoints.blob]"
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC1diagStorageAccountName')), '2019-06-01').primaryEndpoints.blob]"
                   }
                 }
               },
@@ -1177,6 +913,9 @@
               "apiVersion": "2020-06-01",
               "name": "[parameters('DC2name')]",
               "location": "[parameters('location')]",
+              "tags": {
+                "Domain_Controller": "Secondary"
+              },
               "properties": {
                 "osProfile": {
                   "computerName": "[parameters('DC2name')]",
@@ -1185,9 +924,6 @@
                   "windowsConfiguration": {
                     "provisionVMAgent": true
                   }
-                },
-                "availabilitySet": {
-                  "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetNameVar'))]"
                 },
                 "hardwareProfile": {
                   "vmSize": "[parameters('vmSize')]"
@@ -1210,11 +946,11 @@
                   "dataDisks": [
                     {
                       "name": "DC2-datadisk",
-                      "diskSizeGB": 32,
+                      "diskSizeGB": 4,
                       "lun": 0,
                       "createOption": "Empty",
                       "managedDisk": {
-                        "storageAccountType": "Standard_LRS"
+                        "storageAccountType": "Premium_LRS"
                       }
                     }
                   ]
@@ -1232,7 +968,7 @@
                 "diagnosticsProfile": {
                   "bootDiagnostics": {
                     "enabled": true,
-                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC2diagStorageAccountName'))).primaryEndpoints.blob]"
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('DC2diagStorageAccountName')), '2019-06-01').primaryEndpoints.blob]"
                   }
                 }
               },
@@ -1254,11 +990,11 @@
             {
               "type": "Microsoft.Compute/virtualMachines",
               "apiVersion": "2020-06-01",
-              "name": "[parameters('APPname')]",
+              "name": "[parameters('FILEname')]",
               "location": "[parameters('location')]",
               "properties": {
                 "osProfile": {
-                  "computerName": "[parameters('APPname')]",
+                  "computerName": "[parameters('FILEname')]",
                   "adminUsername": "[parameters('localAdminUser')]",
                   "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
@@ -1269,36 +1005,31 @@
                   "vmSize": "[parameters('vmSize')]"
                 },
                 "storageProfile": {
-                  "copy": [
-                    {
-                      "name": "dataDisks",
-                      "count": "[length(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))))]",
-                      "input": {
-                        "lun": "[range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')]]",
-                        "createOption": "[variables('dataDisks').createOption]",
-                        "caching": "[if(greaterOrEquals(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')], parameters('sqlDataDisksCount')), 'None', variables('dataDisks').caching)]",
-                        "writeAcceleratorEnabled": "[variables('dataDisks').writeAcceleratorEnabled]",
-                        "diskSizeGB": "[variables('dataDisks').diskSizeGB]",
-                        "managedDisk": {
-                          "storageAccountType": "[variables('dataDisks').storageAccountType]"
-                        }
-                      }
-                    }
-                  ],
                   "imageReference": {
-                    "publisher": "MicrosoftSQLServer",
-                    "offer": "[parameters('imageOffer')]",
-                    "sku": "[parameters('sqlSku')]",
+                    "publisher": "MicrosoftWindowsServer",
+                    "offer": "WindowsServer",
+                    "sku": "2022-Datacenter-smalldisk",
                     "version": "latest"
                   },
                   "osDisk": {
-                    "name": "APP-osdisk",
+                    "name": "FILE-osdisk",
                     "createOption": "FromImage",
-                    "diskSizeGB": 128,
+                    "diskSizeGB": 64,
                     "managedDisk": {
                       "storageAccountType": "Standard_LRS"
                     }
-                  }
+                  },
+                  "dataDisks": [
+                    {
+                      "name": "FILE-datadisk1",
+                      "diskSizeGB": 128,
+                      "lun": 0,
+                      "createOption": "Empty",
+                      "managedDisk": {
+                        "storageAccountType": "Premium_LRS"
+                      }
+                    }
+                  ]
                 },
                 "networkProfile": {
                   "networkInterfaces": [
@@ -1306,20 +1037,20 @@
                       "properties": {
                         "primary": true
                       },
-                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('APPnetworkInterfaceName'))]"
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('FILEnetworkInterfaceName'))]"
                     }
                   ]
                 },
                 "diagnosticsProfile": {
                   "bootDiagnostics": {
                     "enabled": true,
-                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('APPdiagStorageAccountName'))).primaryEndpoints.blob]"
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('APPdiagStorageAccountName')), '2019-06-01').primaryEndpoints.blob]"
                   }
                 }
               },
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('APPdiagStorageAccountName'))]",
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('APPnetworkInterfaceName'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('FILEnetworkInterfaceName'))]"
               ]
             },
             {
@@ -1331,35 +1062,6 @@
                 "name": "Standard_LRS"
               },
               "kind": "Storage"
-            },
-            {
-              "type": "Microsoft.SqlVirtualMachine/sqlVirtualMachines",
-              "apiVersion": "2022-07-01-preview",
-              "name": "[parameters('APPname')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "virtualMachineResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]",
-                "sqlManagement": "Full",
-                "sqlServerLicenseType": "PAYG",
-                "storageConfigurationSettings": {
-                  "diskConfigurationType": "[variables('diskConfigurationType')]",
-                  "storageWorkloadType": "[parameters('storageWorkloadType')]",
-                  "sqlDataSettings": {
-                    "luns": "[variables('dataDisksLuns')]",
-                    "defaultFilePath": "[parameters('dataPath')]"
-                  },
-                  "sqlLogSettings": {
-                    "luns": "[variables('logDisksLuns')]",
-                    "defaultFilePath": "[parameters('logPath')]"
-                  },
-                  "sqlTempDbSettings": {
-                    "defaultFilePath": "[variables('tempDbPath')]"
-                  }
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]"
-              ]
             },
             {
               "type": "Microsoft.Network/networkInterfaces",
@@ -1502,7 +1204,7 @@
                   "fileUris": [
                     "https://raw.githubusercontent.com/Ortus-Ireland/wgConfig/main/wg-init.sh"
                   ],
-                  "commandToExecute": "[format('sudo sh wg-init.sh {0} {1} {2} {3} {4} {5} {6}', parameters('WireguardConfNum'), parameters('WireguardStartingIP'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName'))).ipAddress, parameters('WGadminUsername'), parameters('DC1privateIP'), parameters('DC2privateIP'), parameters('allowedIPs'))]"
+                  "commandToExecute": "[format('sudo sh wg-init.sh {0} {1} {2} {3} {4} {5} {6}', parameters('WireguardConfNum'), parameters('WireguardStartingIP'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('WGpublicIPAddressName')), '2020-06-01').ipAddress, parameters('WGadminUsername'), parameters('DC1privateIP'), parameters('DC2privateIP'), parameters('allowedIPs'))]"
                 }
               },
               "dependsOn": [
@@ -1552,14 +1254,14 @@
             {
               "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
               "apiVersion": "2020-02-02",
-              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainerAPP'), variables('protectedItemAPP'))]",
+              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainerFILE'), variables('protectedItemFILE'))]",
               "properties": {
                 "protectedItemType": "Microsoft.Compute/virtualMachines",
                 "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]",
-                "sourceResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]"
+                "sourceResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('FILEname'))]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', parameters('APPname'))]",
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('FILEname'))]",
                 "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName_var'))]",
                 "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]"
               ]
@@ -1585,20 +1287,8 @@
                       "2021-04-07T03:00:00.000Z"
                     ],
                     "retentionDuration": {
-                      "count": 180,
+                      "count": 92,
                       "durationType": "Days"
-                    }
-                  },
-                  "weeklySchedule": {
-                    "daysOfTheWeek": [
-                      "Sunday"
-                    ],
-                    "retentionTimes": [
-                      "2021-04-07T03:00:00.000Z"
-                    ],
-                    "retentionDuration": {
-                      "count": 12,
-                      "durationType": "Weeks"
                     }
                   },
                   "monthlySchedule": {
@@ -1615,29 +1305,8 @@
                       "2021-04-07T03:00:00.000Z"
                     ],
                     "retentionDuration": {
-                      "count": 60,
+                      "count": 12,
                       "durationType": "Months"
-                    }
-                  },
-                  "yearlySchedule": {
-                    "retentionScheduleFormatType": "Weekly",
-                    "monthsOfYear": [
-                      "January"
-                    ],
-                    "retentionScheduleWeekly": {
-                      "daysOfTheWeek": [
-                        "Sunday"
-                      ],
-                      "weeksOfTheMonth": [
-                        "First"
-                      ]
-                    },
-                    "retentionTimes": [
-                      "2021-04-07T03:00:00.000Z"
-                    ],
-                    "retentionDuration": {
-                      "count": 7,
-                      "durationType": "Years"
                     }
                   },
                   "retentionPolicyType": "LongTermRetentionPolicy"
@@ -1667,10 +1336,360 @@
                 "disableBgpRoutePropagation": false
               }
             }
+          ],
+          "outputs": {
+            "vnet": {
+              "type": "object",
+              "value": "[reference(resourceId('Microsoft.Network/virtualnetworks', parameters('vnetName')), '2015-05-01-preview', 'full')]"
+            },
+            "nsgID": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            },
+            "subnetRef": {
+              "type": "string",
+              "value": "[variables('subnetRef')]"
+            },
+            "vaultName_var": {
+              "type": "string",
+              "value": "[parameters('vaultName_var')]"
+            },
+            "vaultName_policyName": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', split(variables('BackupPolicyName'), '/')[0], split(variables('BackupPolicyName'), '/')[1])]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "condition": "[equals(parameters('deploymentType'), 'AVD with sql2019-ws2022')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "DeploySQL",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "adminPassword": {
+            "value": "[parameters('adminPassword')]"
+          },
+          "vnetPrefix": {
+            "value": "[parameters('vnetPrefix')]"
+          },
+          "vnet": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs'), '2020-10-01').outputs.vnet.value]"
+          },
+          "nsgID": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs'), '2020-10-01').outputs.nsgID.value]"
+          },
+          "subnetRef": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs'), '2020-10-01').outputs.subnetRef.value]"
+          },
+          "vaultName_var": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs'), '2020-10-01').outputs.vaultName_var.value]"
+          },
+          "vaultName_policyName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs'), '2020-10-01').outputs.vaultName_policyName.value]"
+          },
+          "imageOffer": {
+            "value": "[parameters('imageOffer')]"
+          },
+          "sqlSku": {
+            "value": "[parameters('sqlSku')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.14.85.62628",
+              "templateHash": "6898411394178395205"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "SQLpublicIPAddressName": {
+              "type": "string",
+              "defaultValue": "SQL-PublicIP"
+            },
+            "vnet": {
+              "type": "object"
+            },
+            "nsgID": {
+              "type": "string"
+            },
+            "subnetName": {
+              "type": "string",
+              "defaultValue": "subnet"
+            },
+            "SQLnetworkInterfaceName": {
+              "type": "string",
+              "defaultValue": "SQLinterface"
+            },
+            "subnetRef": {
+              "type": "string"
+            },
+            "SQLprivateIP": {
+              "type": "string",
+              "defaultValue": "[format('{0}.13', parameters('vnetPrefix'))]"
+            },
+            "localAdminUser": {
+              "type": "string",
+              "defaultValue": "localadmin"
+            },
+            "adminPassword": {
+              "type": "securestring"
+            },
+            "SQLname": {
+              "type": "string",
+              "defaultValue": "SQL"
+            },
+            "vmSize": {
+              "type": "string",
+              "defaultValue": "Standard_B1ms"
+            },
+            "vnetPrefix": {
+              "type": "string"
+            },
+            "SQLdiagStorageAccountName": {
+              "type": "string",
+              "defaultValue": "[concat('sqldiags', uniqueString(resourceGroup().id))]"
+            },
+            "imageOffer": {
+              "type": "string"
+            },
+            "sqlSku": {
+              "type": "string"
+            },
+            "storageWorkloadType": {
+              "type": "string",
+              "defaultValue": "General"
+            },
+            "sqlDataDisksCount": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "dataPath": {
+              "type": "string",
+              "defaultValue": "F:\\SQLData"
+            },
+            "sqlLogDisksCount": {
+              "type": "int",
+              "defaultValue": 1
+            },
+            "logPath": {
+              "type": "string",
+              "defaultValue": "G:\\SQLLog"
+            },
+            "vaultName_var": {
+              "type": "string"
+            },
+            "vaultName_policyName": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "diskConfigurationType": "NEW",
+            "dataDisksLuns": "[range(0, parameters('sqlDataDisksCount'))]",
+            "logDisksLuns": "[range(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))]",
+            "dataDisks": {
+              "createOption": "Empty",
+              "caching": "ReadOnly",
+              "writeAcceleratorEnabled": false,
+              "storageAccountType": "Premium_LRS",
+              "diskSizeGB": 128
+            },
+            "tempDbPath": "D:\\SQLTemp",
+            "backupFabric": "Azure",
+            "protectionContainerSQL": "[format('iaasvmcontainer;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('SQLname'))]",
+            "protectedItemSQL": "[format('vm;iaasvmcontainerv2;{0};{1}', resourceGroup().name, parameters('SQLname'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/publicIPAddresses",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('SQLpublicIPAddressName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publicIPAllocationMethod": "Static",
+                "publicIPAddressVersion": "IPv4",
+                "idleTimeoutInMinutes": 4
+              },
+              "sku": {
+                "name": "Basic"
+              }
+            },
+            {
+              "type": "Microsoft.Network/networkInterfaces",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('SQLnetworkInterfaceName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "ipConfigurations": [
+                  {
+                    "name": "ipconfig1",
+                    "properties": {
+                      "publicIPAddress": {
+                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('SQLpublicIPAddressName'))]"
+                      },
+                      "subnet": {
+                        "id": "[parameters('subnetRef')]"
+                      },
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[parameters('SQLprivateIP')]"
+                    }
+                  }
+                ],
+                "networkSecurityGroup": {
+                  "id": "[parameters('nsgID')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('SQLpublicIPAddressName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Compute/virtualMachines",
+              "apiVersion": "2020-06-01",
+              "name": "[parameters('SQLname')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "osProfile": {
+                  "computerName": "[parameters('SQLname')]",
+                  "adminUsername": "[parameters('localAdminUser')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                    "provisionVMAgent": true
+                  }
+                },
+                "hardwareProfile": {
+                  "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                  "copy": [
+                    {
+                      "name": "dataDisks",
+                      "count": "[length(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount'))))]",
+                      "input": {
+                        "lun": "[range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')]]",
+                        "createOption": "[variables('dataDisks').createOption]",
+                        "caching": "[if(greaterOrEquals(range(0, add(parameters('sqlDataDisksCount'), parameters('sqlLogDisksCount')))[copyIndex('dataDisks')], parameters('sqlDataDisksCount')), 'None', variables('dataDisks').caching)]",
+                        "writeAcceleratorEnabled": "[variables('dataDisks').writeAcceleratorEnabled]",
+                        "diskSizeGB": "[variables('dataDisks').diskSizeGB]",
+                        "managedDisk": {
+                          "storageAccountType": "[variables('dataDisks').storageAccountType]"
+                        }
+                      }
+                    }
+                  ],
+                  "imageReference": {
+                    "publisher": "MicrosoftSQLServer",
+                    "offer": "[parameters('imageOffer')]",
+                    "sku": "[parameters('sqlSku')]",
+                    "version": "latest"
+                  },
+                  "osDisk": {
+                    "name": "SQL-osdisk",
+                    "createOption": "FromImage",
+                    "diskSizeGB": 128,
+                    "managedDisk": {
+                      "storageAccountType": "Standard_LRS"
+                    }
+                  }
+                },
+                "networkProfile": {
+                  "networkInterfaces": [
+                    {
+                      "properties": {
+                        "primary": true
+                      },
+                      "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('SQLnetworkInterfaceName'))]"
+                    }
+                  ]
+                },
+                "diagnosticsProfile": {
+                  "bootDiagnostics": {
+                    "enabled": true,
+                    "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('SQLdiagStorageAccountName')), '2019-06-01').primaryEndpoints.blob]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('SQLdiagStorageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('SQLnetworkInterfaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2019-06-01",
+              "name": "[parameters('SQLdiagStorageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage"
+            },
+            {
+              "type": "Microsoft.SqlVirtualMachine/sqlVirtualMachines",
+              "apiVersion": "2022-07-01-preview",
+              "name": "[parameters('SQLname')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "virtualMachineResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('SQLname'))]",
+                "sqlManagement": "Full",
+                "sqlServerLicenseType": "PAYG",
+                "storageConfigurationSettings": {
+                  "diskConfigurationType": "[variables('diskConfigurationType')]",
+                  "storageWorkloadType": "[parameters('storageWorkloadType')]",
+                  "sqlDataSettings": {
+                    "luns": "[variables('dataDisksLuns')]",
+                    "defaultFilePath": "[parameters('dataPath')]"
+                  },
+                  "sqlLogSettings": {
+                    "luns": "[variables('logDisksLuns')]",
+                    "defaultFilePath": "[parameters('logPath')]"
+                  },
+                  "sqlTempDbSettings": {
+                    "defaultFilePath": "[variables('tempDbPath')]"
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('SQLname'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+              "apiVersion": "2020-02-02",
+              "name": "[format('{0}/{1}/{2}/{3}', parameters('vaultName_var'), variables('backupFabric'), variables('protectionContainerSQL'), variables('protectedItemSQL'))]",
+              "properties": {
+                "protectedItemType": "Microsoft.Compute/virtualMachines",
+                "policyId": "[parameters('vaultName_policyName')]",
+                "sourceResourceId": "[resourceId('Microsoft.Compute/virtualMachines', parameters('SQLname'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('SQLname'))]"
+              ]
+            }
           ]
         }
       },
       "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'DeployVMs')]",
         "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
       ]
     }
